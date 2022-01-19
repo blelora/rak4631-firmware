@@ -20,7 +20,6 @@
 #include <Arduino.h>
 #include <nrf_nvic.h>
 
-// LoRaWAN
-#include <LoRaWan-RAK4630.h>
+#include "lorawan.h"
 
 #endif // MAIN_H
