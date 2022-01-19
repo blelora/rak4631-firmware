@@ -21,5 +21,6 @@
 #include <nrf_nvic.h>
 
 #include "lorawan.h"
+#include "ble_core.h"
 
 #endif // MAIN_H

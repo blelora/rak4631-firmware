@@ -1,7 +1,6 @@
 #include "main.h"
 
 #define LED_GREEN PIN_LED1
-#define LED_BLUE PIN_LED2
 
 void setup()
 {
@@ -34,6 +33,9 @@ void setup()
     MYLOG("APP", "=====================================");
     MYLOG("APP", "RAK4631 Firmware Starting");
     MYLOG("APP", "=====================================");
+
+    // Init BLE
+    init_ble();
 }
 
 void loop()
