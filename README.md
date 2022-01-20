@@ -1,5 +1,12 @@
 # rak4631-firmware 
 
+## Roadmap
+
+ * [x] DFU Capability
+ * [ ] BLE UART Terminal
+ * [ ] LoRaWAN Credential Configuration
+ * [ ] LoRaWAN Operation Configuration
+
 ## Installation - PlatformIO
 
 ### Board Support
