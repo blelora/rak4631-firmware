@@ -3,6 +3,9 @@
 // BLE DFU service
 BLEDfu bledfu;
 
+// BLE Device Information Service
+BLEDis ble_dis;
+
 // Forward declarations for functions
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
@@ -22,11 +25,17 @@ void init_ble(void)
     // Set the BLE device name
     Bluefruit.setName("4631");
 
+    // Set DIS Info
+    ble_dis.setManufacturer("RAKwireless");
+	ble_dis.setModel("RAK4631");
+
     Bluefruit.Periph.setConnectCallback(connect_callback);
     Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
-    // To be consistent OTA DFU should be added first if it exists
+    // Start DFU Service 
     bledfu.begin();
+    // Start DIS Service
+    ble_dis.begin();
     
     // Set up and start advertising
     // Advertising packet
