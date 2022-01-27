@@ -10,6 +10,8 @@ BLEUart ble_uart;
 // Forward declarations for functions
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
+// BLE UART RX callback
+void bleuart_rx_callback(uint16_t conn_handle);
 
 bool ble_uart_is_connected = false;
 
@@ -41,6 +43,7 @@ void init_ble(void)
     ble_dis.begin();
     // Start the UART service
 	ble_uart.begin();
+    ble_uart.setRxCallback(bleuart_rx_callback);
     
     // Set up and start advertising
     // Advertising packet
@@ -60,6 +63,7 @@ void init_ble(void)
 void connect_callback(uint16_t conn_handle)
 {
     (void)conn_handle;
+    ble_uart_is_connected = true;
     Serial.println("BLE client connected");
 }
 
@@ -69,4 +73,13 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
     (void)conn_handle;
     (void)reason;
     Serial.println("BLE client disconnected");
+}
+
+// BLE UART RX Callback
+void bleuart_rx_callback(uint16_t conn_handle)
+{
+	(void)conn_handle;
+
+	g_task_event_type |= BLE_DATA;
+	xSemaphoreGiveFromISR(g_task_sem, pdFALSE);
 }
