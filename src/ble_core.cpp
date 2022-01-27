@@ -1,8 +1,7 @@
 #include "main.h"
 
 // BLE DFU service
-BLEDfu bledfu;
-
+BLEDfu ble_dfu;
 // BLE Device Information Service
 BLEDis ble_dis;
 
@@ -33,7 +32,7 @@ void init_ble(void)
     Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
     // Start DFU Service 
-    bledfu.begin();
+    ble_dfu.begin();
     // Start DIS Service
     ble_dis.begin();
     
