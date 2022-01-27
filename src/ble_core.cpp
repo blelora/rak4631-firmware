@@ -4,10 +4,14 @@
 BLEDfu ble_dfu;
 // BLE Device Information Service
 BLEDis ble_dis;
+// BLE UART Service
+BLEUart ble_uart;
 
 // Forward declarations for functions
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
+
+bool ble_uart_is_connected = false;
 
 // Initialize BLE and start advertising
 void init_ble(void)
@@ -35,12 +39,14 @@ void init_ble(void)
     ble_dfu.begin();
     // Start DIS Service
     ble_dis.begin();
+    // Start the UART service
+	ble_uart.begin();
     
     // Set up and start advertising
     // Advertising packet
     Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
     Bluefruit.Advertising.addTxPower();
-    Bluefruit.Advertising.addService(bledfu);
+    Bluefruit.Advertising.addService(ble_dfu);
     Bluefruit.Advertising.addName();
 
     // Start Advertising
