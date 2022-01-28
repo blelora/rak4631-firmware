@@ -64,7 +64,7 @@ void connect_callback(uint16_t conn_handle)
 {
     (void)conn_handle;
     ble_uart_is_connected = true;
-    Serial.println("BLE client connected");
+    DEBUG_LOG("BLE", "BLE Connected");
 }
 
 // Callback invoked when a connection is dropped
@@ -72,7 +72,8 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
     (void)conn_handle;
     (void)reason;
-    Serial.println("BLE client disconnected");
+    ble_uart_is_connected = false;
+    DEBUG_LOG("BLE", "BLE Disconnected");
 }
 
 // BLE UART RX Callback
