@@ -79,24 +79,35 @@ void loop()
         digitalWrite(LED_BUILTIN, HIGH);
         while (g_task_event_type != NO_EVENT)
         {
-            // Timer triggered event
+            // Timer triggered event, check serial
             if ((g_task_event_type & STATUS) == STATUS)
             {
                 g_task_event_type &= N_STATUS;
+                int temp;
+                while (Serial.available() > 0)
+				{
+                    temp = Serial.read();
+					Serial.printf("%c", temp);
+                    ble_uart.printf("%c", temp);
+					delay(5);
+				}
+                // DEBUG_LOG("SERIAL", "Received Command");
                 // DEBUG_LOG("APP", "Timer wakeup");
             }
             // BLE UART data handling
             if ((g_task_event_type & BLE_DATA) == BLE_DATA)
             {
-                DEBUG_LOG("AT", "Received Command");
                 /** BLE UART data arrived */
                 g_task_event_type &= N_BLE_DATA;
-
+                int temp;
                 while (ble_uart.available() > 0)
                 {
-                    Serial.printf("%c", ble_uart.read());
+                    temp = ble_uart.read();
+                    ble_uart.printf("%c", temp);
+                    Serial.printf("%c", temp);
                     delay(5);
                 }
+                DEBUG_LOG("BLE UART", "Received Command");
             }
         }
 
