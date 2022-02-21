@@ -89,7 +89,7 @@ struct s_lorawan_settings
 	// Data port to send data
 	uint8_t app_port = 2;
 	// Flag to enable confirmed messages
-	lmh_confirm confirmed_msg_enabled = LMH_UNCONFIRMED_MSG;
+	lmh_confirm confirmed_msg_enabled = LMH_CONFIRMED_MSG;
 	// Command from BLE to reset device
 	bool resetRequest = true;
 	// LoRa region
@@ -97,6 +97,13 @@ struct s_lorawan_settings
 };
 
 extern s_lorawan_settings g_lorawan_settings;
+extern uint8_t g_rx_lora_data[];
+extern uint8_t g_rx_data_len;
+extern uint8_t g_tx_lora_data[];
+extern uint8_t g_tx_data_len;
+extern bool g_lorawan_initialized;
+extern int16_t g_last_rssi;
+extern int8_t g_last_snr;
 
 void lora_data_handler(void);
 

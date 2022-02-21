@@ -69,7 +69,7 @@ void setup()
     init_lorawan();
 
     // LoRa is setup, start the timer that will wakeup the loop frequently
-    g_task_wakeup_timer.begin(500, periodic_wakeup);
+    g_task_wakeup_timer.begin(5000, periodic_wakeup);
     g_task_wakeup_timer.start();
 
     DEBUG_LOG("APP", "Setup Complete");
@@ -151,7 +151,7 @@ void loop()
         Serial.flush();
         g_task_event_type = 0;
         // Go back to sleep
-        xSemaphoreTake(g_task_sem, 500);
+        xSemaphoreTake(g_task_sem, 10);
         // Switch off blue LED to show we go to sleep
         digitalWrite(LED_BUILTIN, LOW);
         delay(10);
@@ -191,15 +191,15 @@ void lora_data_handler(void)
 		/**************************************************************/
 		g_task_event_type &= N_LORA_DATA;
 		DEBUG_LOG("APP", "Received package over LoRa");
-		// char log_buff[g_rx_data_len * 3] = {0};
-		// uint8_t log_idx = 0;
-		// for (int idx = 0; idx < g_rx_data_len; idx++)
-		// {
-		// 	sprintf(&log_buff[log_idx], "%02X ", g_rx_lora_data[idx]);
-		// 	log_idx += 3;
-		// }
+		char log_buff[g_rx_data_len * 3] = {0};
+		uint8_t log_idx = 0;
+		for (int idx = 0; idx < g_rx_data_len; idx++)
+		{
+			sprintf(&log_buff[log_idx], "%02X ", g_rx_lora_data[idx]);
+			log_idx += 3;
+		}
 		lora_busy = false;
-		// DEBUG_LOG("APP", "%s", log_buff);
+		DEBUG_LOG("APP", "%s", log_buff);
 	}
 
 	// LoRa TX finished handling
