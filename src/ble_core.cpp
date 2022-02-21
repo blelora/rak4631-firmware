@@ -1,14 +1,19 @@
 #include "main.h"
 
 // BLE DFU service
-BLEDfu bledfu;
-
+BLEDfu ble_dfu;
 // BLE Device Information Service
 BLEDis ble_dis;
+// BLE UART Service
+BLEUart ble_uart;
 
 // Forward declarations for functions
 void connect_callback(uint16_t conn_handle);
 void disconnect_callback(uint16_t conn_handle, uint8_t reason);
+// BLE UART RX callback
+void bleuart_rx_callback(uint16_t conn_handle);
+
+bool ble_uart_is_connected = false;
 
 // Initialize BLE and start advertising
 void init_ble(void)
@@ -33,15 +38,18 @@ void init_ble(void)
     Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
     // Start DFU Service 
-    bledfu.begin();
+    ble_dfu.begin();
     // Start DIS Service
     ble_dis.begin();
+    // Start the UART service
+	ble_uart.begin();
+    ble_uart.setRxCallback(bleuart_rx_callback);
     
     // Set up and start advertising
     // Advertising packet
     Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
     Bluefruit.Advertising.addTxPower();
-    Bluefruit.Advertising.addService(bledfu);
+    Bluefruit.Advertising.addService(ble_dfu);
     Bluefruit.Advertising.addName();
 
     // Start Advertising
@@ -55,7 +63,8 @@ void init_ble(void)
 void connect_callback(uint16_t conn_handle)
 {
     (void)conn_handle;
-    Serial.println("BLE client connected");
+    ble_uart_is_connected = true;
+    DEBUG_LOG("BLE", "BLE Connected");
 }
 
 // Callback invoked when a connection is dropped
@@ -63,5 +72,15 @@ void disconnect_callback(uint16_t conn_handle, uint8_t reason)
 {
     (void)conn_handle;
     (void)reason;
-    Serial.println("BLE client disconnected");
+    ble_uart_is_connected = false;
+    DEBUG_LOG("BLE", "BLE Disconnected");
+}
+
+// BLE UART RX Callback
+void bleuart_rx_callback(uint16_t conn_handle)
+{
+	(void)conn_handle;
+
+	g_task_event_type |= BLE_DATA;
+	xSemaphoreGiveFromISR(g_task_sem, pdFALSE);
 }
