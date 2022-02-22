@@ -28,6 +28,18 @@ do                                               \
 #include "lorawan.h"
 #include "ble_core.h"
 
+#include "at_cmd.h"
+typedef struct atcmd_s
+{
+	const char *cmd_name;		   // CMD NAME
+	const char *cmd_desc;		   // AT+CMD?
+	int (*query_cmd)(void);		   // AT+CMD=?
+	int (*exec_cmd)(char *str);	   // AT+CMD=value
+	int (*exec_cmd_no_para)(void); // AT+CMD
+} atcmd_t;
+void at_serial_input(uint8_t cmd);
+extern atcmd_t g_user_at_cmd_list[] __attribute__((weak));
+
 // Wake up events
 #define NO_EVENT 0
 #define STATUS 0b0000000000000001
@@ -89,7 +101,7 @@ struct s_lorawan_settings
 	// Data port to send data
 	uint8_t app_port = 2;
 	// Flag to enable confirmed messages
-	lmh_confirm confirmed_msg_enabled = LMH_CONFIRMED_MSG;
+	lmh_confirm confirmed_msg_enabled = LMH_UNCONFIRMED_MSG;
 	// Command from BLE to reset device
 	bool resetRequest = true;
 	// LoRa region

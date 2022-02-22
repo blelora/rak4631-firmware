@@ -69,7 +69,7 @@ void setup()
     init_lorawan();
 
     // LoRa is setup, start the timer that will wakeup the loop frequently
-    g_task_wakeup_timer.begin(5000, periodic_wakeup);
+    g_task_wakeup_timer.begin(500, periodic_wakeup);
     g_task_wakeup_timer.start();
 
     DEBUG_LOG("APP", "Setup Complete");
@@ -93,51 +93,51 @@ void loop()
             if ((g_task_event_type & STATUS) == STATUS)
             {
                 g_task_event_type &= N_STATUS;
-                int temp;
+                uint8_t temp;
                 while (Serial.available() > 0)
                 {
                     temp = Serial.read();
-                    Serial.printf("%c", temp);
+                    at_serial_input(uint8_t(temp));
                     ble_uart.printf("%c", temp);
                     delay(5);
                 }
                 // DEBUG_LOG("SERIAL", "Received Command");
                 // DEBUG_LOG("APP", "Timer wakeup");
-                if (lora_busy)
-                {
-                    DEBUG_LOG("APP", "LoRaWAN TX cycle not finished, skip this event");
-                }
-                else
-                {
-                    lmh_error_status result;
-                    result = send_lora_packet((uint8_t *)&lora_packet, 10);
+                // if (lora_busy)
+                // {
+                //     DEBUG_LOG("APP", "LoRaWAN TX cycle not finished, skip this event");
+                // }
+                // else
+                // {
+                //     lmh_error_status result;
+                //     // result = send_lora_packet((uint8_t *)&lora_packet, 10);
 
-                    switch (result)
-                    {
-                    case LMH_SUCCESS:
-                        DEBUG_LOG("APP", "Packet enqueued");
-                        /// \todo set a flag that TX cycle is running
-                        lora_busy = true;
-                        break;
-                    case LMH_BUSY:
-                        DEBUG_LOG("APP", "LoRa transceiver is busy");
-                        break;
-                    case LMH_ERROR:
-                        DEBUG_LOG("APP", "Packet error, too big to send with current DR");
-                        break;
-                    }
-                }
+                //     switch (result)
+                //     {
+                //     case LMH_SUCCESS:
+                //         DEBUG_LOG("APP", "Packet enqueued");
+                //         /// \todo set a flag that TX cycle is running
+                //         lora_busy = true;
+                //         break;
+                //     case LMH_BUSY:
+                //         DEBUG_LOG("APP", "LoRa transceiver is busy");
+                //         break;
+                //     case LMH_ERROR:
+                //         DEBUG_LOG("APP", "Packet error, too big to send with current DR");
+                //         break;
+                //     }
+                // }
             }
             // BLE UART data handling
             if ((g_task_event_type & BLE_DATA) == BLE_DATA)
             {
                 /** BLE UART data arrived */
                 g_task_event_type &= N_BLE_DATA;
-                int temp;
+                uint8_t temp;
                 while (ble_uart.available() > 0)
                 {
                     temp = ble_uart.read();
-                    ble_uart.printf("%c", temp);
+                    at_serial_input(uint8_t(temp));
                     Serial.printf("%c", temp);
                     delay(5);
                 }
