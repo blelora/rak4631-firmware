@@ -122,7 +122,7 @@ int8_t init_lorawan(void)
 
     // DEBUG_LOG("LORA", "Initialize LoRaWAN for region %s", region_names[g_lorawan_settings.lora_region]);
     // Initialize LoRaWan
-    if (lmh_init(&lora_callbacks, lora_param_init, g_lorawan_settings.otaa_enabled, (eDeviceClass)g_lorawan_settings.lora_class, (LoRaMacRegion_t)g_lorawan_settings.lora_region) != 0)
+    if (lmh_init(&lora_callbacks, lora_param_init, true, (eDeviceClass)g_lorawan_settings.lora_class, (LoRaMacRegion_t)g_lorawan_settings.lora_region) != 0)
     {
         DEBUG_LOG("LORA", "Failed to initialize LoRaWAN");
         return -2;
@@ -181,14 +181,7 @@ static void lpwan_joined_handler(void)
     otaaDevAddr = lmh_getDevAddr();
 
 #if DEBUG > 0
-    if (g_lorawan_settings.otaa_enabled)
-    {
-        DEBUG_LOG("LORA", "OTAA joined and got dev address %08lX", otaaDevAddr);
-    }
-    else
-    {
-        DEBUG_LOG("LORA", "ABP joined");
-    }
+    DEBUG_LOG("LORA", "OTAA joined and got dev address %08lX", otaaDevAddr);
 
     delay(100); // Just to enable the serial port to send the message
 #endif
