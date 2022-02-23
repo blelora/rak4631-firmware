@@ -97,14 +97,14 @@ static int at_query_deveui(void)
 {
 	snprintf(g_at_query_buf, ATQUERY_SIZE,
 			 "%02X%02X%02X%02X%02X%02X%02X%02X",
-			 g_lorawan_settings.node_device_eui[0],
-			 g_lorawan_settings.node_device_eui[1],
-			 g_lorawan_settings.node_device_eui[2],
-			 g_lorawan_settings.node_device_eui[3],
-			 g_lorawan_settings.node_device_eui[4],
-			 g_lorawan_settings.node_device_eui[5],
-			 g_lorawan_settings.node_device_eui[6],
-			 g_lorawan_settings.node_device_eui[7]);
+			 g_lorawan_credentials.node_device_eui[0],
+			 g_lorawan_credentials.node_device_eui[1],
+			 g_lorawan_credentials.node_device_eui[2],
+			 g_lorawan_credentials.node_device_eui[3],
+			 g_lorawan_credentials.node_device_eui[4],
+			 g_lorawan_credentials.node_device_eui[5],
+			 g_lorawan_credentials.node_device_eui[6],
+			 g_lorawan_credentials.node_device_eui[7]);
 	return 0;
 }
 
@@ -124,7 +124,7 @@ static int at_exec_deveui(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	memcpy(g_lorawan_settings.node_device_eui, buf, 8);
+	memcpy(g_lorawan_credentials.node_device_eui, buf, 8);
 	// save_settings();
 
 	return 0;
@@ -139,14 +139,14 @@ static int at_query_appeui(void)
 {
 	snprintf(g_at_query_buf, ATQUERY_SIZE,
 			 "%02X%02X%02X%02X%02X%02X%02X%02X",
-			 g_lorawan_settings.node_app_eui[0],
-			 g_lorawan_settings.node_app_eui[1],
-			 g_lorawan_settings.node_app_eui[2],
-			 g_lorawan_settings.node_app_eui[3],
-			 g_lorawan_settings.node_app_eui[4],
-			 g_lorawan_settings.node_app_eui[5],
-			 g_lorawan_settings.node_app_eui[6],
-			 g_lorawan_settings.node_app_eui[7]);
+			 g_lorawan_credentials.node_app_eui[0],
+			 g_lorawan_credentials.node_app_eui[1],
+			 g_lorawan_credentials.node_app_eui[2],
+			 g_lorawan_credentials.node_app_eui[3],
+			 g_lorawan_credentials.node_app_eui[4],
+			 g_lorawan_credentials.node_app_eui[5],
+			 g_lorawan_credentials.node_app_eui[6],
+			 g_lorawan_credentials.node_app_eui[7]);
 	return 0;
 }
 
@@ -166,7 +166,7 @@ static int at_exec_appeui(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	memcpy(g_lorawan_settings.node_app_eui, buf, 8);
+	memcpy(g_lorawan_credentials.node_app_eui, buf, 8);
 	// save_settings();
 
 	return 0;
@@ -184,7 +184,7 @@ static int at_query_appkey(void)
 
 	for (i = 0; i < 16; i++)
 	{
-		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_settings.node_app_key[i]);
+		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_credentials.node_app_key[i]);
 		if (ATQUERY_SIZE <= len)
 		{
 			return -1;
@@ -209,7 +209,7 @@ static int at_exec_appkey(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	memcpy(g_lorawan_settings.node_app_key, buf, 16);
+	memcpy(g_lorawan_credentials.node_app_key, buf, 16);
 	// save_settings();
 
 	return 0;
@@ -228,7 +228,7 @@ static int at_query_devaddr(void)
 	}
 	else
 	{
-		snprintf(g_at_query_buf, ATQUERY_SIZE, "%08lX\n", g_lorawan_settings.node_dev_addr);
+		snprintf(g_at_query_buf, ATQUERY_SIZE, "%08lX\n", g_lorawan_credentials.node_dev_addr);
 	}
 	return 0;
 }
@@ -256,7 +256,7 @@ static int at_exec_devaddr(char *str)
 		swap_buf[i] = buf[3 - i];
 	}
 
-	memcpy(&g_lorawan_settings.node_dev_addr, swap_buf, 4);
+	memcpy(&g_lorawan_credentials.node_dev_addr, swap_buf, 4);
 	// save_settings();
 
 	return 0;
@@ -274,7 +274,7 @@ static int at_query_appskey(void)
 
 	for (i = 0; i < 16; i++)
 	{
-		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_settings.node_apps_key[i]);
+		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_credentials.node_apps_key[i]);
 		if (ATQUERY_SIZE <= len)
 		{
 			return -1;
@@ -300,7 +300,7 @@ static int at_exec_appskey(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	memcpy(g_lorawan_settings.node_apps_key, buf, 16);
+	memcpy(g_lorawan_credentials.node_apps_key, buf, 16);
 	// save_settings();
 
 	return 0;
@@ -318,7 +318,7 @@ static int at_query_nwkskey(void)
 
 	for (i = 0; i < 16; i++)
 	{
-		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_settings.node_nws_key[i]);
+		len += snprintf(g_at_query_buf + len, ATQUERY_SIZE - len, "%02X", g_lorawan_credentials.node_nws_key[i]);
 		if (ATQUERY_SIZE <= len)
 		{
 			return -1;
@@ -344,7 +344,7 @@ static int at_exec_nwkskey(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	memcpy(g_lorawan_settings.node_nws_key, buf, 16);
+	memcpy(g_lorawan_credentials.node_nws_key, buf, 16);
 	// save_settings();
 
 	return 0;

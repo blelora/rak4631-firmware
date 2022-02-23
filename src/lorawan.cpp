@@ -1,5 +1,7 @@
 #include "main.h"
 
+/** LoRaWAN credentials from flash */
+s_lorawan_credentials g_lorawan_credentials;
 /** LoRaWAN setting from flash */
 s_lorawan_settings g_lorawan_settings;
 
@@ -105,9 +107,9 @@ int8_t init_lorawan(void)
     }
 
     // Setup the EUIs and Keys
-    lmh_setDevEui(g_lorawan_settings.node_device_eui);
-    lmh_setAppEui(g_lorawan_settings.node_app_eui);
-    lmh_setAppKey(g_lorawan_settings.node_app_key);
+    lmh_setDevEui(g_lorawan_credentials.node_device_eui);
+    lmh_setAppEui(g_lorawan_credentials.node_app_eui);
+    lmh_setAppKey(g_lorawan_credentials.node_app_key);
     // lmh_setNwkSKey(g_lorawan_settings.node_nws_key);
     // lmh_setAppSKey(g_lorawan_settings.node_apps_key);
     // lmh_setDevAddr(g_lorawan_settings.node_dev_addr);
