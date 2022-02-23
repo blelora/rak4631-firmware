@@ -84,7 +84,7 @@ static int at_exec_reboot(void)
  */
 static int at_exec_restore(void)
 {
-	// flash_reset();
+	flash_reset();
 	return 0;
 }
 
@@ -125,7 +125,7 @@ static int at_exec_deveui(char *str)
 	}
 
 	memcpy(g_lorawan_credentials.node_device_eui, buf, 8);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }
@@ -167,7 +167,7 @@ static int at_exec_appeui(char *str)
 	}
 
 	memcpy(g_lorawan_credentials.node_app_eui, buf, 8);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }
@@ -210,7 +210,7 @@ static int at_exec_appkey(char *str)
 	}
 
 	memcpy(g_lorawan_credentials.node_app_key, buf, 16);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }
@@ -257,7 +257,7 @@ static int at_exec_devaddr(char *str)
 	}
 
 	memcpy(&g_lorawan_credentials.node_dev_addr, swap_buf, 4);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }
@@ -301,7 +301,7 @@ static int at_exec_appskey(char *str)
 	}
 
 	memcpy(g_lorawan_credentials.node_apps_key, buf, 16);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }
@@ -345,7 +345,7 @@ static int at_exec_nwkskey(char *str)
 	}
 
 	memcpy(g_lorawan_credentials.node_nws_key, buf, 16);
-	// save_settings();
+	save_credentials();
 
 	return 0;
 }

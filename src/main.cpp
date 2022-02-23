@@ -37,7 +37,7 @@ void setup()
     pinMode(LED_GREEN, OUTPUT);
     digitalWrite(LED_GREEN, LOW);
 
-#if MY_DEBUG > 0
+#if DEBUG > 0
     // Initialize Serial for debug output
     Serial.begin(115200);
 
@@ -57,16 +57,21 @@ void setup()
     }
 #endif
 
+    delay(1000);
+
     digitalWrite(LED_GREEN, HIGH);
 
     DEBUG_LOG("APP", "===========================");
     DEBUG_LOG("APP", "RAK4631 Firmware Starting");
     DEBUG_LOG("APP", "===========================");
 
+    // Init Flash
+    init_flash();
+
     // Init BLE
     init_ble();
 
-    init_lorawan();
+    // init_lorawan();
 
     // LoRa is setup, start the timer that will wakeup the loop frequently
     g_task_wakeup_timer.begin(500, periodic_wakeup);
