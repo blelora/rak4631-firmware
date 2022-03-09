@@ -2,6 +2,7 @@
 
 /** LoRaWAN credentials from flash */
 s_lorawan_credentials g_lorawan_credentials;
+
 /** LoRaWAN setting from flash */
 s_lorawan_settings g_lorawan_settings;
 

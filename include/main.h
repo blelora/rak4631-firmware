@@ -60,25 +60,19 @@ extern SemaphoreHandle_t g_task_sem;
 extern volatile uint16_t g_task_event_type;
 extern SoftwareTimer g_task_wakeup_timer;
 
-#define LORAWAN_CREDENTIALS_MARKER 0x45
+// #define LORAWAN_CREDENTIALS_MARKER 0x45
 struct s_lorawan_credentials
 {
-	uint8_t valid_mark_1 = 0xAA;				// Just a marker for the Flash
-	uint8_t valid_mark_2 = LORAWAN_CREDENTIALS_MARKER; // Just a marker for the Flash
-
 	// OTAA Device EUI MSB
 	uint8_t node_device_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	// OTAA Application Key MSB
 	uint8_t node_app_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Network Session Key MSB
-	uint8_t node_nws_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Application Session key MSB
-	uint8_t node_apps_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Device Address MSB
-	uint32_t node_dev_addr = 0x00000000;
 };
+
+// s_lorawan_config
+// s_lorawan_controls
 
 #define LORAWAN_SETTINGS_MARKER 0x56
 struct s_lorawan_settings
@@ -118,6 +112,7 @@ struct s_lorawan_settings
 
 extern s_lorawan_credentials g_lorawan_credentials;
 extern s_lorawan_settings g_lorawan_settings;
+extern uint8_t g_lorawan_credentials_status;
 extern uint8_t g_rx_lora_data[];
 extern uint8_t g_rx_data_len;
 extern uint8_t g_tx_lora_data[];
