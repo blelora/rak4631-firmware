@@ -6,12 +6,17 @@ BLEDfu ble_dfu;
 BLEDis ble_dis;
 // BLE UART Service
 BLEUart ble_uart;
+
+BLEService        lorawan_control_service = BLEService("AAA00000-0000-0000-0000-123456789ABC");
+BLECharacteristic lorawan_control_char = BLECharacteristic("AAA10000-0000-0000-0000-123456789ABC");
                                 
 BLEService        lorawan_credential_service = BLEService("BBB00000-0000-0000-0000-123456789ABC");
 BLECharacteristic lorawan_credential_data_char = BLECharacteristic("BBB10000-0000-0000-0000-123456789ABC");
 BLECharacteristic lorawan_credential_status_char = BLECharacteristic("BBB20000-0000-0000-0000-123456789ABC");
 
+
 // Settings callback
+void lorawan_control_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
 void lorawan_credentials_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
 
 // Forward declarations for functions
@@ -52,8 +57,11 @@ void init_ble(void)
 	ble_uart.begin();
     ble_uart.setRxCallback(bleuart_rx_callback);
 
-    // Initialize the LoRa setting service
+    // Initialize the LoRa control service
 	BLEService lorawan_creds_s = init_lorawan_credentials_characteristics();
+
+	// Initialize the LoRa control service
+	BLEService lorawan_control_s = init_lorawan_control_characteristics();
     
     // Set up and start advertising
     // Advertising packet
@@ -99,6 +107,27 @@ void bleuart_rx_callback(uint16_t conn_handle)
  * @brief Initialize the settings characteristic
  * 
  */
+BLEService init_lorawan_control_characteristics(void)
+{
+	// Initialize the credential control char
+	lorawan_control_service.begin();
+	lorawan_control_char.setProperties(CHR_PROPS_NOTIFY | CHR_PROPS_READ | CHR_PROPS_WRITE);
+	lorawan_control_char.setPermission(SECMODE_OPEN, SECMODE_OPEN);
+	lorawan_control_char.setFixedLen(1);
+	lorawan_control_char.setWriteCallback(lorawan_control_rx_callback);
+
+	lorawan_control_char.begin();
+
+	lorawan_control_char.write8(0);
+
+
+	return lorawan_control_service;
+}
+
+/**
+ * @brief Initialize the settings characteristic
+ * 
+ */
 BLEService init_lorawan_credentials_characteristics(void)
 {
 	// Initialize the credential data char
@@ -135,9 +164,64 @@ BLEService init_lorawan_credentials_characteristics(void)
  * @param len
  *      Length of the received data
  */
+void lorawan_control_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len)
+{
+	DEBUG_LOG("SETT", "LoRaWAN Control Write received");
+
+	delay(1000);
+
+	// Check the characteristic
+	if (chr->uuid == lorawan_control_char.uuid)
+	{
+		uint8_t *rcvdControl = data;
+		if (len != 1)
+		{
+			DEBUG_LOG("SETT", "Received LoRaWAN Control Write has wrong size %d", len);
+		}
+		else
+		{
+			DEBUG_LOG("SETT", "Received LoRaWAN Control Write with data %d and correct size %d", *rcvdControl, len);
+
+			if(*rcvdControl == 1)
+			{
+				init_lorawan();
+
+				g_task_lora_tx_wakeup_timer.start();
+
+				// Inform connected device about valid new credentials
+				lorawan_control_char.notify8(1);
+
+				// Inform connected device about valid new credentials
+				lorawan_control_char.write8(1);
+			}
+			else if(*rcvdControl == 0)
+			{
+				g_task_lora_tx_wakeup_timer.stop();
+
+				// Inform connected device about valid new credentials
+				lorawan_control_char.notify8(0);
+
+				// Inform connected device about valid new credentials
+				lorawan_control_char.write8(0);
+			}
+		}
+	}
+}
+
+/**
+ * Callback if data has been sent from the connected client
+ * @param conn_hdl
+ * 		The connection handle
+ * @param chr
+ *      The called characteristic
+ * @param data
+ *      Pointer to received data
+ * @param len
+ *      Length of the received data
+ */
 void lorawan_credentials_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len)
 {
-	DEBUG_LOG("SETT", "Credentials received");
+	DEBUG_LOG("SETT", "LoRaWAN Credential Write received");
 
 	delay(1000);
 

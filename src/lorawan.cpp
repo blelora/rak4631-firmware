@@ -139,7 +139,7 @@ int8_t init_lorawan(void)
         return -3;
     }
 
-    DEBUG_LOG("LORA", "Begin timer");
+    DEBUG_LOG("LORA", "Begin join timer");
     // Initialize the app timer
     g_task_wakeup_timer.begin(g_lorawan_settings.send_repeat_time, periodic_wakeup);
 
