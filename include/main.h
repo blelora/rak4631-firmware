@@ -48,34 +48,30 @@ extern atcmd_t g_user_at_cmd_list[] __attribute__((weak));
 #define N_BLE_DATA 0b1111111111111011
 #define LORA_DATA 0b0000000000001000
 #define N_LORA_DATA 0b1111111111110111
+#define BLE_CONFIG 0b0000000000000010
+#define N_BLE_CONFIG 0b1111111111111101
 #define LORA_TX_FIN 0b0000000000010000
 #define N_LORA_TX_FIN 0b1111111111101111
 #define LORA_JOIN_FIN 0b0000000001000000
 #define N_LORA_JOIN_FIN 0b1111111110111111
+#define LORA_TX 0b0000000010000000 
+#define N_LORA_TX 0b1111111101111111 
 
 void periodic_wakeup(TimerHandle_t unused);
 extern SemaphoreHandle_t g_task_sem;
 extern volatile uint16_t g_task_event_type;
 extern SoftwareTimer g_task_wakeup_timer;
+extern SoftwareTimer g_task_lora_tx_wakeup_timer;
 
-#define LORAWAN_CREDENTIALS_MARKER 0x45
+// #define LORAWAN_CREDENTIALS_MARKER 0x45
 struct s_lorawan_credentials
 {
-	uint8_t valid_mark_1 = 0xAA;				// Just a marker for the Flash
-	uint8_t valid_mark_2 = LORAWAN_CREDENTIALS_MARKER; // Just a marker for the Flash
-
 	// OTAA Device EUI MSB
 	uint8_t node_device_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	// OTAA Application Key MSB
 	uint8_t node_app_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Network Session Key MSB
-	uint8_t node_nws_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Application Session key MSB
-	uint8_t node_apps_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	// ABP Device Address MSB
-	uint32_t node_dev_addr = 0x00000000;
 };
 
 #define LORAWAN_SETTINGS_MARKER 0x56
@@ -87,7 +83,7 @@ struct s_lorawan_settings
 	// Flag if node joins automatically after reboot
 	bool auto_join = false;
 	// Send repeat time in milliseconds: 2 * 60 * 1000 => 2 minutes
-	uint32_t send_repeat_time = 0;
+	uint32_t send_repeat_time = 10000;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
 	// Flag for public or private network
@@ -116,6 +112,7 @@ struct s_lorawan_settings
 
 extern s_lorawan_credentials g_lorawan_credentials;
 extern s_lorawan_settings g_lorawan_settings;
+extern uint8_t g_lorawan_credentials_status;
 extern uint8_t g_rx_lora_data[];
 extern uint8_t g_rx_data_len;
 extern uint8_t g_tx_lora_data[];
