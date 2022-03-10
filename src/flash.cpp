@@ -113,7 +113,6 @@ void flash_reset(void)
 void log_credentials(void)
 {
 	DEBUG_LOG("FLASH", "Saved settings:");
-	// DEBUG_LOG("FLASH", "000 Marks: %02X %02X", g_lorawan_credentials.valid_mark_1, g_lorawan_credentials.valid_mark_2);
 	DEBUG_LOG("FLASH", "002 Dev EUI %02X%02X%02X%02X%02X%02X%02X%02X", g_lorawan_credentials.node_device_eui[0], g_lorawan_credentials.node_device_eui[1],
 			  g_lorawan_credentials.node_device_eui[2], g_lorawan_credentials.node_device_eui[3],
 			  g_lorawan_credentials.node_device_eui[4], g_lorawan_credentials.node_device_eui[5],
@@ -131,23 +130,4 @@ void log_credentials(void)
 			  g_lorawan_credentials.node_app_key[10], g_lorawan_credentials.node_app_key[11],
 			  g_lorawan_credentials.node_app_key[12], g_lorawan_credentials.node_app_key[13],
 			  g_lorawan_credentials.node_app_key[14], g_lorawan_credentials.node_app_key[15]);
-	// DEBUG_LOG("FLASH", "034 Dev Addr %08lX", g_lorawan_credentials.node_dev_addr);
-	// DEBUG_LOG("FLASH", "038 NWS Key %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-	// 		g_lorawan_credentials.node_nws_key[0], g_lorawan_credentials.node_nws_key[1],
-	// 		g_lorawan_credentials.node_nws_key[2], g_lorawan_credentials.node_nws_key[3],
-	// 		g_lorawan_credentials.node_nws_key[4], g_lorawan_credentials.node_nws_key[5],
-	// 		g_lorawan_credentials.node_nws_key[6], g_lorawan_credentials.node_nws_key[7],
-	// 		g_lorawan_credentials.node_nws_key[8], g_lorawan_credentials.node_nws_key[9],
-	// 		g_lorawan_credentials.node_nws_key[10], g_lorawan_credentials.node_nws_key[11],
-	// 		g_lorawan_credentials.node_nws_key[12], g_lorawan_credentials.node_nws_key[13],
-	// 		g_lorawan_credentials.node_nws_key[14], g_lorawan_credentials.node_nws_key[15]);
-	// DEBUG_LOG("FLASH", "054 Apps Key %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-	// 		g_lorawan_credentials.node_apps_key[0], g_lorawan_credentials.node_apps_key[1],
-	// 		g_lorawan_credentials.node_apps_key[2], g_lorawan_credentials.node_apps_key[3],
-	// 		g_lorawan_credentials.node_apps_key[4], g_lorawan_credentials.node_apps_key[5],
-	// 		g_lorawan_credentials.node_apps_key[6], g_lorawan_credentials.node_apps_key[7],
-	// 		g_lorawan_credentials.node_apps_key[8], g_lorawan_credentials.node_apps_key[9],
-	// 		g_lorawan_credentials.node_apps_key[10], g_lorawan_credentials.node_apps_key[11],
-	// 		g_lorawan_credentials.node_apps_key[12], g_lorawan_credentials.node_apps_key[13],
-	// 		g_lorawan_credentials.node_apps_key[14], g_lorawan_credentials.node_apps_key[15]);
 }
