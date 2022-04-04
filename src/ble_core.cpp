@@ -184,24 +184,36 @@ void lorawan_control_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint
 
 			if(*rcvdControl == 1)
 			{
-				init_lorawan();
+				switch(init_lorawan()) {
+					case -1 :
+						DEBUG_LOG("LORA", "Failed to initialize SX1262");
+						lorawan_control_char.notify8(2);
+						lorawan_control_char.write8(2);
+						break;
+					case -2 :
+						DEBUG_LOG("LORA", "Failed to initialize LoRaWAN");
+						lorawan_control_char.notify8(3);
+						lorawan_control_char.write8(3);
+						break;
+					case -3 :
+						DEBUG_LOG("LORA", "lmh_setSubBandChannels failed. Wrong sub band requested?");
+						lorawan_control_char.notify8(4);
+						lorawan_control_char.write8(4);
+						break;
+					default :
+						g_task_lora_tx_wakeup_timer.start();
 
-				g_task_lora_tx_wakeup_timer.start();
-
-				// Inform connected device about valid new credentials
-				lorawan_control_char.notify8(1);
-
-				// Inform connected device about valid new credentials
-				lorawan_control_char.write8(1);
+						// init lorawan successful
+						lorawan_control_char.notify8(1);
+						lorawan_control_char.write8(1);
+				}
 			}
 			else if(*rcvdControl == 0)
 			{
 				g_task_lora_tx_wakeup_timer.stop();
 
-				// Inform connected device about valid new credentials
+				// lorawan tx stopped
 				lorawan_control_char.notify8(0);
-
-				// Inform connected device about valid new credentials
 				lorawan_control_char.write8(0);
 			}
 		}
