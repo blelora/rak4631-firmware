@@ -215,6 +215,356 @@ static int at_exec_appkey(char *str)
 	return 0;
 }
 
+/**
+ * @brief AT+CFM=? Get current confirm/unconfirmed packet status
+ * 
+ * @return int always 0
+ */
+static int at_query_confirm(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.confirmed_msg_enabled);
+	return 0;
+}
+
+/**
+ * @brief AT+CFM=X Set confirmed / unconfirmed packet sending
+ * 
+ * @param str 0 = unconfirmed 1 = confirmed packet
+ * @return int 0 if correct parameter
+ */
+static int at_exec_confirm(char *str)
+{
+	int cfm;
+
+	cfm = strtol(str, NULL, 0);
+	if (cfm != 0 && cfm != 1)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.confirmed_msg_enabled = (lmh_confirm)cfm;
+	// save_settings();
+
+	return 0;
+}
+
+/**
+ * @brief AT+SENDFREQ=? Get current send frequency
+ * 
+ * @return int always 0
+ */
+static int at_query_sendfreq(void)
+{
+	// Return time in seconds, but it is saved in milli seconds
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", (g_lorawan_settings.send_repeat_time == 0) ? 0 : (int)(g_lorawan_settings.send_repeat_time / 1000));
+
+	return 0;
+}
+
+/**
+ * @brief AT+SENDFREQ=<value> Set current send frequency
+ * 
+ * @param str send frequency in seconds between 0 (disabled) and 3600
+ * @return int 
+ */
+static int at_exec_sendfreq(char *str)
+{
+	long time = strtol(str, NULL, 0);
+
+	if ((time < 0) || (time > 3600))
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.send_repeat_time = time * 1000;
+	// save_settings();
+
+	if ((g_lorawan_settings.send_repeat_time != 0))
+	{
+		// Now we are connected, start the timer that will wakeup the loop frequently
+		g_task_lora_tx_wakeup_timer.stop();
+		g_task_lora_tx_wakeup_timer.setPeriod(g_lorawan_settings.send_repeat_time);
+		g_task_lora_tx_wakeup_timer.start();
+	}
+
+	return 0;
+}
+
+/**
+ * @brief AT+ADR=? Get current adaptive datarate status
+ * 
+ * @return int always 0
+ */
+static int at_query_adr(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.adr_enabled ? 1 : 0);
+	return 0;
+}
+
+/**
+ * @brief AT+ADR=X Enable/disable adaptive datarate
+ * 
+ * @param str 0 = disable, 1 = enable ADR
+ * @return int 0 if correct parameter
+ */
+static int at_exec_adr(char *str)
+{
+	int adr;
+
+	adr = strtol(str, NULL, 0);
+	if (adr != 0 && adr != 1)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.adr_enabled = (adr == 1 ? true : false);
+
+	// save_settings();
+
+	return 0;
+}
+
+/**
+ * @brief AT+DR=? Get current datarate
+ * 
+ * @return int always 0
+ */
+static int at_query_datarate(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.data_rate);
+	return 0;
+}
+
+/**
+ * @brief AT+DR=X Set datarate
+ * 
+ * @param str 0 to 15, depending on region
+ * @return int 0 if correct parameter
+ */
+static int at_exec_datarate(char *str)
+{
+	uint8_t datarate;
+
+	datarate = strtol(str, NULL, 0);
+
+	if (datarate > 15)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.data_rate = datarate;
+	// save_settings();
+
+	return 0;
+}
+
+/**
+ * @brief AT+TXP=? Get current TX power setting
+ * 
+ * @return int always 0
+ */
+static int at_query_txpower(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.tx_power);
+	return 0;
+}
+
+/**
+ * @brief AT+TXP Set TX power
+ * 
+ * @param str TX power 0 to 10
+ * @return int always 0
+ */
+static int at_exec_txpower(char *str)
+{
+	uint8_t tx_power;
+
+	tx_power = strtol(str, NULL, 0);
+
+	if (tx_power > 10)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.tx_power = tx_power;
+
+	// save_settings();
+
+	return 0;
+}
+
+/**
+ * @brief AT+BAND=? Get regional frequency band
+ * 
+ * @return int always 0
+ */
+static int at_query_region(void)
+{
+	// 0: AS923 1: AU915 2: CN470 3: CN779 4: EU433 5: EU868 6: KR920 7: IN865 8: US915 9: AS923-2 10: AS923-3 11: AS923-4 12: RU864
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.lora_region);
+
+	return 0;
+}
+
+/**
+ * @brief AT+BAND=xx Set regional frequency band
+ *  Values: 0: AS923 1: AU915 2: CN470 3: CN779 4: EU433 5: EU868 6: KR920 7: IN865 8: US915 9: AS923-2 10: AS923-3 11: AS923-4 12: RU864
+ * @return int 0 if valid parameter
+ */
+static int at_exec_region(char *str)
+{
+	char *param;
+	uint8_t region;
+
+	param = strtok(str, ",");
+	if (param != NULL)
+	{
+		region = strtol(param, NULL, 0);
+		// RAK4630 0: AS923 1: AU915 2: CN470 3: CN779 4: EU433 5: EU868 6: KR920 7: IN865 8: US915 9: AS923-2 10: AS923-3 11: AS923-4 12: RU864
+		if (region > 12)
+		{
+			return AT_ERRNO_PARA_VAL;
+		}
+		g_lorawan_settings.lora_region = region;
+		// save_settings();
+	}
+	else
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief AT+MASK=? Get channel mask
+ *  Only available for regions 1: AU915 2: CN470 8: US915
+ * @return int always 0
+ */
+static int at_query_mask(void)
+{
+	if ((g_lorawan_settings.lora_region == 1) || (g_lorawan_settings.lora_region == 2) || (g_lorawan_settings.lora_region == 8))
+	{
+		snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.subband_channels);
+
+		return 0;
+	}
+	return AT_ERRNO_PARA_VAL;
+}
+
+/**
+ * @brief AT+MASK=xx Set channel mask
+ *  Only available for regions 1: AU915 2: CN470 8: US915
+ * @return int 0 if valid parameter
+ */
+static int at_exec_mask(char *str)
+{
+	char *param;
+	uint8_t mask;
+
+	param = strtok(str, ",");
+	if (param != NULL)
+	{
+		mask = strtol(param, NULL, 0);
+
+		uint8_t maxBand = 1;
+		switch (g_lorawan_settings.lora_region)
+		{
+		case LORAMAC_REGION_AU915:
+			maxBand = 9;
+			break;
+		case LORAMAC_REGION_CN470:
+			maxBand = 12;
+			break;
+		case LORAMAC_REGION_US915:
+			maxBand = 9;
+			break;
+		default:
+			return AT_ERRNO_PARA_VAL;
+		}
+		if ((mask == 0) || (mask > maxBand))
+		{
+			return AT_ERRNO_PARA_VAL;
+		}
+		g_lorawan_settings.subband_channels = mask;
+		// save_settings();
+	}
+	else
+	{
+		return AT_ERRNO_PARA_NUM;
+	}
+
+	return 0;
+}
+
+/**
+ * @brief AT+JT=? Get current join trials
+ * 
+ * @return int always 0
+ */
+static int at_query_jointrials(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.join_trials);
+	return 0;
+}
+
+/**
+ * @brief AT+JT=X Set join trials
+ * 
+ * @param str 1 to 10
+ * @return int 0 if correct parameter
+ */
+static int at_exec_jointrials(char *str)
+{
+	uint8_t jointrials;
+
+	jointrials = strtol(str, NULL, 0);
+
+	if (jointrials <= 0 || jointrials > 100)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.join_trials = jointrials;
+	// save_settings();
+
+	return 0;
+}
+
+/**
+ * @brief AT+AP=? Get current app port
+ * 
+ * @return int always 0
+ */
+static int at_query_appport(void)
+{
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", g_lorawan_settings.app_port);
+	return 0;
+}
+
+/**
+ * @brief AT+AP=X Set app port
+ * 
+ * @param str 1 to 1223
+ * @return int 0 if correct parameter
+ */
+static int at_exec_appport(char *str)
+{
+	uint8_t appport;
+
+	appport = strtol(str, NULL, 0);
+
+	if (appport <= 0 || appport > 224)
+	{
+		return AT_ERRNO_PARA_VAL;
+	}
+
+	g_lorawan_settings.app_port = appport;
+	// save_settings();
+
+	return 0;
+}
+
 static int at_exec_list_all(void);
 
 /**
@@ -231,6 +581,17 @@ static atcmd_t g_at_cmd_list[] = {
 	{"+APPEUI", "Get or set the application EUI", at_query_appeui, at_exec_appeui, NULL},
 	{"+APPKEY", "Get or set the application key", at_query_appkey, at_exec_appkey, NULL},
 	{"+DEVEUI", "Get or set the device EUI", at_query_deveui, at_exec_deveui, NULL},
+	// Joining and sending data on LoRa network
+	{"+JT", "Get or Set the Join Trials", at_query_jointrials, at_exec_jointrials, NULL},
+	{"+AP", "Get or Set the App Port", at_query_appport, at_exec_appport, NULL},
+	{"+CFM", "Get or set the confirm mode", at_query_confirm, at_exec_confirm, NULL},
+	{"+SENDFREQ", "Get or Set the automatic send time", at_query_sendfreq, at_exec_sendfreq, NULL},
+	// LoRa network management
+	{"+ADR", "Get or set the adaptive data rate setting", at_query_adr, at_exec_adr, NULL},
+	{"+DR", "Get or Set the Tx DataRate=[0..7]", at_query_datarate, at_exec_datarate, NULL},
+	{"+TXP", "Get or set the transmit power", at_query_txpower, at_exec_txpower, NULL},
+	{"+BAND", "Get and Set number corresponding to active regions", at_query_region, at_exec_region, NULL},
+	{"+MASK", "Get and Set channels mask", at_query_mask, at_exec_mask, NULL},
 };
 
 /**

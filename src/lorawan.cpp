@@ -124,7 +124,7 @@ int8_t init_lorawan(void)
     lora_param_init.enable_public_network = g_lorawan_static_settings.public_network;
     lora_param_init.nb_trials = g_lorawan_settings.join_trials;
     lora_param_init.tx_power = g_lorawan_settings.tx_power;
-    lora_param_init.duty_cycle = g_lorawan_settings.duty_cycle_enabled;
+    lora_param_init.duty_cycle = g_lorawan_static_settings.duty_cycle_enabled;
 
     // DEBUG_LOG("LORA", "Initialize LoRaWAN for region %s", region_names[g_lorawan_settings.lora_region]);
     // Initialize LoRaWan

@@ -76,12 +76,10 @@ struct s_lorawan_credentials
 
 struct s_lorawan_settings
 {
-	// Send repeat time in milliseconds: 2 * 60 * 1000 => 2 minutes
+	// Send repeat time in milliseconds
 	uint32_t send_repeat_time = 10000;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
-	// Flag to enable duty cycle (validity depends on Region)
-	bool duty_cycle_enabled = false;
 	// Number of join retries
 	uint8_t join_trials = 5;
 	// TX power 0 .. 15 (validity depends on Region)
@@ -99,14 +97,12 @@ struct s_lorawan_settings
 };
 struct s_lorawan_static_settings
 {
-	// Flag if node joins automatically after reboot
-	bool auto_join = false;
 	// Flag for public or private network
 	bool public_network = true;
+	// Flag to enable duty cycle (validity depends on Region)
+	bool duty_cycle_enabled = false;
 	// LoRaWAN class 0: A, 2: C, 1: B is not supported
 	uint8_t lora_class = 0;
-	// Command from BLE to reset device
-	bool resetRequest = true;
 };
 
 extern s_lorawan_credentials g_lorawan_credentials;
