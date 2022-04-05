@@ -6,6 +6,9 @@ s_lorawan_credentials g_lorawan_credentials;
 /** LoRaWAN setting from flash */
 s_lorawan_settings g_lorawan_settings;
 
+/** LoRaWAN setting from flash */
+s_lorawan_static_settings g_lorawan_static_settings;
+
 /** Buffer for received LoRaWan data */
 uint8_t g_rx_lora_data[256];
 /** Length of received data */
@@ -118,14 +121,14 @@ int8_t init_lorawan(void)
     // Setup the LoRaWan init structure
     lora_param_init.adr_enable = g_lorawan_settings.adr_enabled;
     lora_param_init.tx_data_rate = g_lorawan_settings.data_rate;
-    lora_param_init.enable_public_network = g_lorawan_settings.public_network;
+    lora_param_init.enable_public_network = g_lorawan_static_settings.public_network;
     lora_param_init.nb_trials = g_lorawan_settings.join_trials;
     lora_param_init.tx_power = g_lorawan_settings.tx_power;
-    lora_param_init.duty_cycle = g_lorawan_settings.duty_cycle_enabled;
+    lora_param_init.duty_cycle = g_lorawan_static_settings.duty_cycle_enabled;
 
     // DEBUG_LOG("LORA", "Initialize LoRaWAN for region %s", region_names[g_lorawan_settings.lora_region]);
     // Initialize LoRaWan
-    if (lmh_init(&lora_callbacks, lora_param_init, true, (eDeviceClass)g_lorawan_settings.lora_class, (LoRaMacRegion_t)g_lorawan_settings.lora_region) != 0)
+    if (lmh_init(&lora_callbacks, lora_param_init, true, (eDeviceClass)g_lorawan_static_settings.lora_class, (LoRaMacRegion_t)g_lorawan_settings.lora_region) != 0)
     {
         DEBUG_LOG("LORA", "Failed to initialize LoRaWAN");
         return -2;
@@ -141,7 +144,8 @@ int8_t init_lorawan(void)
 
     DEBUG_LOG("LORA", "Begin join timer");
     // Initialize the app timer
-    g_task_wakeup_timer.begin(g_lorawan_settings.send_repeat_time, periodic_wakeup);
+    // g_task_wakeup_timer.begin(g_lorawan_settings.send_repeat_time, periodic_wakeup);
+    g_task_lora_tx_wakeup_timer.begin(g_lorawan_settings.send_repeat_time, lora_tx_wakeup);
 
     DEBUG_LOG("LORA", "Start Join");
     // Start Join process
@@ -202,15 +206,15 @@ static void lpwan_joined_handler(void)
 
     g_lpwan_has_joined = true;
 
-    if (g_lorawan_settings.send_repeat_time != 0)
-    {
-        DEBUG_LOG("LORA", "Start timer");
-        delay(100); // Just to enable the serial port to send the message
-        // Now we are connected, start the timer that will wakeup the loop frequently
-        g_task_wakeup_timer.start();
-        DEBUG_LOG("LORA", "Started timer");
-        delay(100); // Just to enable the serial port to send the message
-    }
+    // if (g_lorawan_settings.send_repeat_time != 0)
+    // {
+    //     DEBUG_LOG("LORA", "Start timer");
+    //     delay(100); // Just to enable the serial port to send the message
+    //     // Now we are connected, start the timer that will wakeup the loop frequently
+    //     // g_task_wakeup_timer.start();
+    //     DEBUG_LOG("LORA", "Started timer");
+    //     delay(100); // Just to enable the serial port to send the message
+    // }
 }
 
 /**

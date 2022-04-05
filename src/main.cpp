@@ -83,15 +83,9 @@ void setup()
     // Init BLE
     init_ble();
 
-    // init_lorawan();
-
     // LoRa is setup, start the timer that will wakeup the loop frequently
     g_task_wakeup_timer.begin(500, periodic_wakeup);
     g_task_wakeup_timer.start();
-
-    // LoRa is setup, start the timer that will wakeup the loop frequently
-    g_task_lora_tx_wakeup_timer.begin(5000, lora_tx_wakeup);
-    // g_task_lora_tx_wakeup_timer.start();
 
     DEBUG_LOG("APP", "Setup Complete");
 }
