@@ -4,6 +4,10 @@ static char atcmd[ATCMD_SIZE];
 static uint16_t atcmd_index = 0;
 char g_at_query_buf[ATQUERY_SIZE];
 
+char *region_names[] = {(char *)"AS923", (char *)"AU915", (char *)"CN470", (char *)"CN779",
+						(char *)"EU433", (char *)"EU868", (char *)"KR920", (char *)"IN865",
+						(char *)"US915", (char *)"AS923-2", (char *)"AS923-3", (char *)"AS923-4", (char *)"RU864"};
+
 /**
  * @brief Convert Hex string into uint8_t array
  * 
@@ -243,7 +247,7 @@ static int at_exec_confirm(char *str)
 	}
 
 	g_lorawan_settings.confirmed_msg_enabled = (lmh_confirm)cfm;
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
@@ -277,7 +281,7 @@ static int at_exec_sendfreq(char *str)
 	}
 
 	g_lorawan_settings.send_repeat_time = time * 1000;
-	// save_settings();
+	save_settings();
 
 	if ((g_lorawan_settings.send_repeat_time != 0))
 	{
@@ -319,7 +323,7 @@ static int at_exec_adr(char *str)
 
 	g_lorawan_settings.adr_enabled = (adr == 1 ? true : false);
 
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
@@ -353,7 +357,7 @@ static int at_exec_datarate(char *str)
 	}
 
 	g_lorawan_settings.data_rate = datarate;
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
@@ -388,7 +392,7 @@ static int at_exec_txpower(char *str)
 
 	g_lorawan_settings.tx_power = tx_power;
 
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
@@ -426,7 +430,7 @@ static int at_exec_region(char *str)
 			return AT_ERRNO_PARA_VAL;
 		}
 		g_lorawan_settings.lora_region = region;
-		// save_settings();
+		save_settings();
 	}
 	else
 	{
@@ -487,7 +491,7 @@ static int at_exec_mask(char *str)
 			return AT_ERRNO_PARA_VAL;
 		}
 		g_lorawan_settings.subband_channels = mask;
-		// save_settings();
+		save_settings();
 	}
 	else
 	{
@@ -526,7 +530,7 @@ static int at_exec_jointrials(char *str)
 	}
 
 	g_lorawan_settings.join_trials = jointrials;
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
@@ -560,7 +564,7 @@ static int at_exec_appport(char *str)
 	}
 
 	g_lorawan_settings.app_port = appport;
-	// save_settings();
+	save_settings();
 
 	return 0;
 }
