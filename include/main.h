@@ -37,6 +37,7 @@ typedef struct atcmd_s
 	int (*exec_cmd)(char *str);	   // AT+CMD=value
 	int (*exec_cmd_no_para)(void); // AT+CMD
 } atcmd_t;
+extern char *region_names[];
 void at_serial_input(uint8_t cmd);
 extern atcmd_t g_user_at_cmd_list[] __attribute__((weak));
 
@@ -122,7 +123,11 @@ void lora_data_handler(void);
 // Flash
 void init_flash(void);
 bool save_credentials(void);
+bool save_settings(void);
 void log_credentials(void);
+void log_settings(void);
 void flash_reset(void);
+void flash_default_credentials(void);
+void flash_default_settings(void);
 
 #endif // MAIN_H
