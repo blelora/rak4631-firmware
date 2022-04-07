@@ -14,10 +14,15 @@ BLEService        lorawan_credential_service = BLEService("BBB00000-0000-0000-00
 BLECharacteristic lorawan_credential_data_char = BLECharacteristic("BBB10000-0000-0000-0000-123456789ABC");
 BLECharacteristic lorawan_credential_status_char = BLECharacteristic("BBB20000-0000-0000-0000-123456789ABC");
 
+BLEService        lorawan_settings_service = BLEService("CCC00000-0000-0000-0000-123456789ABC");
+BLECharacteristic lorawan_settings_data_char = BLECharacteristic("CCC10000-0000-0000-0000-123456789ABC");
+BLECharacteristic lorawan_settings_status_char = BLECharacteristic("CCC20000-0000-0000-0000-123456789ABC");
+
 
 // Settings callback
 void lorawan_control_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
 void lorawan_credentials_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
+void lorawan_settings_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
 
 // Forward declarations for functions
 void connect_callback(uint16_t conn_handle);
@@ -57,11 +62,14 @@ void init_ble(void)
 	ble_uart.begin();
     ble_uart.setRxCallback(bleuart_rx_callback);
 
+	// Initialize the LoRa control service
+	BLEService lorawan_control_s = init_lorawan_control_characteristics();
+
     // Initialize the LoRa control service
 	BLEService lorawan_creds_s = init_lorawan_credentials_characteristics();
 
 	// Initialize the LoRa control service
-	BLEService lorawan_control_s = init_lorawan_control_characteristics();
+	BLEService lorawan_settings_s = init_lorawan_settings_characteristics();
     
     // Set up and start advertising
     // Advertising packet
@@ -125,7 +133,7 @@ BLEService init_lorawan_control_characteristics(void)
 }
 
 /**
- * @brief Initialize the settings characteristic
+ * @brief Initialize the credential characteristics
  * 
  */
 BLEService init_lorawan_credentials_characteristics(void)
@@ -151,6 +159,35 @@ BLEService init_lorawan_credentials_characteristics(void)
 	lorawan_credential_status_char.write8(0);
 
 	return lorawan_credential_service;
+}
+
+/**
+ * @brief Initialize the settings characteristics
+ * 
+ */
+BLEService init_lorawan_settings_characteristics(void)
+{
+	// Initialize the settings data char
+	lorawan_settings_service.begin();
+	lorawan_settings_data_char.setProperties(CHR_PROPS_NOTIFY | CHR_PROPS_READ | CHR_PROPS_WRITE);
+	lorawan_settings_data_char.setPermission(SECMODE_OPEN, SECMODE_OPEN);
+	lorawan_settings_data_char.setFixedLen(sizeof(s_lorawan_settings) + 1);
+	lorawan_settings_data_char.setWriteCallback(lorawan_settings_rx_callback);
+
+	lorawan_settings_data_char.begin();
+
+	lorawan_settings_data_char.write((void *)&g_lorawan_settings, sizeof(s_lorawan_settings));
+
+    // Initialize the settings status char
+	lorawan_settings_status_char.setProperties(CHR_PROPS_NOTIFY | CHR_PROPS_READ);
+	lorawan_settings_status_char.setPermission(SECMODE_OPEN, SECMODE_OPEN);
+	lorawan_settings_status_char.setFixedLen(1);
+
+	lorawan_settings_status_char.begin();
+
+	lorawan_settings_status_char.write8(0);
+
+	return lorawan_settings_service;
 }
 
 /**
@@ -272,6 +309,69 @@ void lorawan_credentials_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, 
 
 			// Inform connected device about valid new credentials
 			lorawan_credential_status_char.write8(0);
+		}
+		// Notify task about the event
+		if (g_task_sem != NULL)
+		{
+			g_task_event_type |= BLE_CONFIG;
+			DEBUG_LOG("SETT", "Waking up loop task");
+			xSemaphoreGive(g_task_sem);
+		}
+	}
+}
+
+/**
+ * Callback if data has been sent from the connected client
+ * @param conn_hdl
+ * 		The connection handle
+ * @param chr
+ *      The called characteristic
+ * @param data
+ *      Pointer to received data
+ * @param len
+ *      Length of the received data
+ */
+void lorawan_settings_rx_callback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len)
+{
+	DEBUG_LOG("SETT", "LoRaWAN Settings Write received");
+
+	delay(1000);
+
+	// Check the characteristic
+	if (chr->uuid == lorawan_settings_data_char.uuid)
+	{
+		if (len != sizeof(s_lorawan_settings))
+		{
+			DEBUG_LOG("SETT", "Received settings have wrong size %d", len);
+
+			// Inform connected device about incorrectnew credentials
+			lorawan_settings_status_char.notify8(2);
+
+			// Inform connected device about incorrect new credentials
+			lorawan_settings_status_char.write8(0);
+		}
+		else
+		{
+
+			DEBUG_LOG("SETT", "Received settings with correct size %d, len");
+
+			// Save new LoRa settings
+			memcpy((void *)&g_lorawan_settings, data, sizeof(s_lorawan_settings));
+
+			// Save new credentials
+			save_settings();
+
+			// Update credentials
+			lorawan_settings_data_char.write((void *)&g_lorawan_settings, sizeof(s_lorawan_settings));
+
+			// Inform connected device about new credentials
+			lorawan_settings_data_char.notify((void *)&g_lorawan_settings, sizeof(s_lorawan_settings));
+
+			// Inform connected device about valid new credentials
+			lorawan_settings_status_char.notify8(1);
+
+			// Inform connected device about valid new credentials
+			lorawan_settings_status_char.write8(0);
 		}
 		// Notify task about the event
 		if (g_task_sem != NULL)
