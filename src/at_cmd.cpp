@@ -260,7 +260,7 @@ static int at_exec_confirm(char *str)
 static int at_query_sendfreq(void)
 {
 	// Return time in seconds, but it is saved in milli seconds
-	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", (g_lorawan_settings.send_repeat_time == 0) ? 0 : (int)(g_lorawan_settings.send_repeat_time / 1000));
+	snprintf(g_at_query_buf, ATQUERY_SIZE, "%d", (g_lorawan_settings.send_repeat_time == 0) ? 0 : (int)(g_lorawan_settings.send_repeat_time));
 
 	return 0;
 }
@@ -280,7 +280,7 @@ static int at_exec_sendfreq(char *str)
 		return AT_ERRNO_PARA_VAL;
 	}
 
-	g_lorawan_settings.send_repeat_time = time * 1000;
+	g_lorawan_settings.send_repeat_time = time;
 	save_settings();
 
 	if ((g_lorawan_settings.send_repeat_time != 0))
