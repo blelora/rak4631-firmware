@@ -18,7 +18,7 @@ volatile uint16_t g_task_event_type = NO_EVENT;
 bool lora_busy = false;
 
 /** Set the device name, max length is 10 characters */
-char lora_packet[10] = "HELLO";
+char lora_packet[6] = "HELLO";
 
 // Period Wakeup for Statuses
 void lora_tx_wakeup(TimerHandle_t unused)
@@ -131,7 +131,7 @@ void loop()
                 else
                 {
                     lmh_error_status result;
-                    result = send_lora_packet((uint8_t *)&lora_packet, 10);
+                    result = send_lora_packet((uint8_t *)&lora_packet, sizeof(lora_packet));
 
                     switch (result)
                     {
