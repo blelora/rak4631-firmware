@@ -1,5 +1,7 @@
 #include "main.h"
 #include "battery.h"
+#include "at_cmd.h"
+
 #include <Wire.h>
 
 #define SYSTEM_STACK_SIZE (256 * 4)
@@ -26,7 +28,7 @@ void system_bringup(void)
     Wire.begin();
     
     battery_init();
-    // at_cmd_init();
+    at_cmd_init();
     // lorawan_init();
     // init_ble();
 }

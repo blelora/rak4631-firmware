@@ -1,5 +1,7 @@
 #include "at_cmd.h"
 
+#define AT_CMD_STACK_SIZE (256 * 4)
+
 static char atcmd[ATCMD_SIZE];
 static uint16_t atcmd_index = 0;
 char g_at_query_buf[ATQUERY_SIZE];
@@ -8,6 +10,31 @@ char *region_names[] = {(char *)"AS923", (char *)"AU915", (char *)"CN470", (char
 						(char *)"EU433", (char *)"EU868", (char *)"KR920", (char *)"IN865",
 						(char *)"US915", (char *)"AS923-2", (char *)"AS923-3", (char *)"AS923-4", (char *)"RU864"};
 
+void at_cmd_task(void *arg);
+void at_serial_input(uint8_t cmd);
+
+void at_cmd_init()
+{
+    DEBUG_LOG("AT CMD", "INIT");
+    xTaskCreate(at_cmd_task, "AT_CMD", AT_CMD_STACK_SIZE, NULL, TASK_PRIO_LOW, NULL);
+}
+
+void at_cmd_task(void *arg)
+{
+    DEBUG_LOG("AT CMD", "TASK START");
+    while (1)
+    {
+        // DEBUG_LOG("AT CMD", "TASK LOOP");
+        uint8_t temp;
+        while (Serial.available() > 0)
+        {
+            temp = Serial.read();
+            // printf("%c", temp);
+            at_serial_input(uint8_t(temp));
+        }
+        vTaskDelay(1);
+    }
+}
 /**
  * @brief Convert Hex string into uint8_t array
  * 
@@ -286,9 +313,9 @@ static int at_exec_sendfreq(char *str)
 	if ((g_lorawan_settings.send_repeat_time != 0))
 	{
 		// Now we are connected, start the timer that will wakeup the loop frequently
-		g_task_lora_tx_wakeup_timer.stop();
-		g_task_lora_tx_wakeup_timer.setPeriod(g_lorawan_settings.send_repeat_time);
-		g_task_lora_tx_wakeup_timer.start();
+		// g_task_lora_tx_wakeup_timer.stop();
+		// g_task_lora_tx_wakeup_timer.setPeriod(g_lorawan_settings.send_repeat_time);
+		// g_task_lora_tx_wakeup_timer.start();
 	}
 
 	return 0;
