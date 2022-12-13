@@ -1,6 +1,14 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <Arduino.h>
+#include <nrf_nvic.h>
+
+#include "lorawan.h"
+#include "ble_core.h"
+
+#include "at_cmd.h"
+
 // Debug output, 0 to disable, 1 to enable
 #define DEBUG 1
 
@@ -22,13 +30,6 @@ do                                               \
 #define DEBUG_LOG(...)
 #endif
 
-#include <Arduino.h>
-#include <nrf_nvic.h>
-
-#include "lorawan.h"
-#include "ble_core.h"
-
-#include "at_cmd.h"
 typedef struct atcmd_s
 {
 	const char *cmd_name;		   // CMD NAME
@@ -68,11 +69,11 @@ extern SoftwareTimer g_task_lora_tx_wakeup_timer;
 struct s_lorawan_credentials
 {
 	// OTAA Device EUI MSB
-	uint8_t node_device_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_device_eui[8] = {0x60, 0x81, 0xF9, 0xBB, 0x36, 0x66, 0x0B, 0xEA};
 	// OTAA Application EUI MSB
-	uint8_t node_app_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_app_eui[8] = {0x60, 0x81, 0xF9, 0xAD, 0xC8, 0x4C, 0xCF, 0x3E};
 	// OTAA Application Key MSB
-	uint8_t node_app_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_app_key[16] = {0xC3, 0xAA, 0xAB, 0xB3, 0x90, 0x1F, 0x53, 0xF4, 0xF5, 0x39, 0xF0, 0x4B, 0x36, 0xB0, 0xCE, 0x16};
 };
 
 struct s_lorawan_settings
