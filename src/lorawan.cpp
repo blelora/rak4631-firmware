@@ -1,5 +1,6 @@
 #include "main.h"
 #include "battery.h"
+#include "lorawan.h"
 
 #define LORAWAN_STACK_SIZE (256 * 4)
 
@@ -263,6 +264,62 @@ int8_t init_lorawan(void)
 
     g_lorawan_initialized = true;
     return 0;
+}
+
+/**
+ * @brief Handle received LoRa Data
+ * 
+ */
+void lora_data_handler(void)
+{
+	// LoRa Join finished handling
+	if ((g_task_event_type & LORA_JOIN_FIN) == LORA_JOIN_FIN)
+	{
+		g_task_event_type &= N_LORA_JOIN_FIN;
+		if (g_join_result)
+		{
+			DEBUG_LOG("APP", "Successfully joined network");
+		}
+		else
+		{
+			DEBUG_LOG("APP", "Join network failed");
+			/// \todo here join could be restarted.
+			// lmh_join();
+		}
+	}
+
+	// LoRa data handling
+	if ((g_task_event_type & LORA_DATA) == LORA_DATA)
+	{
+		/**************************************************************/
+		/**************************************************************/
+		/// \todo LoRa data arrived
+		/// \todo parse them here
+		/**************************************************************/
+		/**************************************************************/
+		g_task_event_type &= N_LORA_DATA;
+		DEBUG_LOG("APP", "Received package over LoRa");
+		char log_buff[g_rx_data_len * 3] = {0};
+		uint8_t log_idx = 0;
+		for (int idx = 0; idx < g_rx_data_len; idx++)
+		{
+			sprintf(&log_buff[log_idx], "%02X ", g_rx_lora_data[idx]);
+			log_idx += 3;
+		}
+		lora_busy = false;
+		DEBUG_LOG("APP", "%s", log_buff);
+	}
+
+	// LoRa TX finished handling
+	if ((g_task_event_type & LORA_TX_FIN) == LORA_TX_FIN)
+	{
+		g_task_event_type &= N_LORA_TX_FIN;
+
+		DEBUG_LOG("APP", "LPWAN TX cycle %s", g_rx_fin_result ? "finished ACK" : "failed NAK");
+
+		/// \todo reset flag that TX cycle is running
+		lora_busy = false;
+	}
 }
 
 /**************************************************************/

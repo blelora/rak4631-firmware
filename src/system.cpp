@@ -1,6 +1,7 @@
 #include "main.h"
 #include "battery.h"
 #include "at_cmd.h"
+#include "lorawan.h"
 
 #include <Wire.h>
 
@@ -30,7 +31,7 @@ void system_bringup(void)
     battery_init();
     at_cmd_init();
     init_ble();
-    // lorawan_init();
+    lorawan_init();
 }
 
 void system_task(void *arg)
