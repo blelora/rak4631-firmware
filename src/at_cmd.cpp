@@ -1,5 +1,7 @@
 #include "at_cmd.h"
 
+#define AT_CMD_STACK_SIZE (256 * 4)
+
 static char atcmd[ATCMD_SIZE];
 static uint16_t atcmd_index = 0;
 char g_at_query_buf[ATQUERY_SIZE];
@@ -8,6 +10,47 @@ char *region_names[] = {(char *)"AS923", (char *)"AU915", (char *)"CN470", (char
 						(char *)"EU433", (char *)"EU868", (char *)"KR920", (char *)"IN865",
 						(char *)"US915", (char *)"AS923-2", (char *)"AS923-3", (char *)"AS923-4", (char *)"RU864"};
 
+void at_cmd_task(void *arg);
+void at_serial_input(uint8_t cmd);
+
+void at_cmd_init()
+{
+    DEBUG_LOG("AT CMD", "INIT");
+    xTaskCreate(at_cmd_task, "AT_CMD", AT_CMD_STACK_SIZE, NULL, TASK_PRIO_LOW, NULL);
+}
+
+void at_cmd_task(void *arg)
+{
+    DEBUG_LOG("AT CMD", "TASK START");
+    while (1)
+    {
+        // DEBUG_LOG("AT CMD", "TASK LOOP");
+        uint8_t temp;
+        while (Serial.available() > 0)
+        {
+            temp = Serial.read();
+            // printf("%c", temp);
+            at_serial_input(uint8_t(temp));
+        }
+
+		if ((g_task_event_type & BLE_DATA) == BLE_DATA)
+		{
+			/** BLE UART data arrived */
+			g_task_event_type &= N_BLE_DATA;
+			uint8_t temp;
+			while (ble_uart.available() > 0)
+			{
+				temp = ble_uart.read();
+				at_serial_input(uint8_t(temp));
+				delay(5);
+			}
+			at_serial_input(uint8_t('\n'));
+			DEBUG_LOG("BLE UART", "Received Command");
+		}
+
+        vTaskDelay(1);
+    }
+}
 /**
  * @brief Convert Hex string into uint8_t array
  * 

@@ -1,4 +1,29 @@
 #include "main.h"
+#include "battery.h"
+#include "lorawan.h"
+
+#define LORAWAN_STACK_SIZE (256 * 4)
+
+void lorawan_task(void *arg);
+int8_t init_lorawan(void);
+lmh_error_status send_lora_packet(uint8_t *data, uint8_t size, uint8_t fport);
+void lora_data_handler(void);
+
+// Semaphore used by events to wake up loop task
+SemaphoreHandle_t g_task_sem = NULL;
+
+/** Flag showing if TX cycle is ongoing */
+bool lora_busy = false;
+
+/** Set the device name, max length is 10 characters */
+// char lora_packet[6] = "HELLO";
+char lora_packet[1] = {0};
+
+// Flag for the event type
+volatile uint16_t g_task_event_type = NO_EVENT;
+
+// Timer to wakeup task frequently and send message
+SoftwareTimer g_task_lora_tx_wakeup_timer;
 
 /** LoRaWAN credentials from flash */
 s_lorawan_credentials g_lorawan_credentials;
@@ -80,6 +105,92 @@ bool g_lpwan_has_joined = false;
 
 uint32_t otaaDevAddr = 0;
 
+// Period Wakeup for LoRaWAN TX
+void lora_tx_wakeup(TimerHandle_t unused)
+{
+    // wake up loop for lorawan tx
+    digitalWrite(LED_BUILTIN, HIGH);
+    g_task_event_type |= LORA_TX;
+    xSemaphoreGiveFromISR(g_task_sem, pdFALSE);
+}
+
+
+void lorawan_init()
+{
+    DEBUG_LOG("LORAWAN", "INIT");
+    // Create the task event semaphore
+    g_task_sem = xSemaphoreCreateBinary();
+    // Initialize semaphore
+    xSemaphoreGive(g_task_sem);
+
+    xTaskCreate(lorawan_task, "LORAWAN", LORAWAN_STACK_SIZE, NULL, TASK_PRIO_LOW, NULL);
+}
+
+void lorawan_task(void *arg)
+{
+    DEBUG_LOG("LORAWAN", "TASK START");
+
+    init_lorawan();
+
+    while(1)
+    {
+        DEBUG_LOG("LORAWAN", "TASK LOOP");
+        // Sleep until we are woken up by an event
+        if (xSemaphoreTake(g_task_sem, portMAX_DELAY) == pdTRUE)
+        {
+        // DEBUG_LOG("APP", "In xSemaphoreTake Loop");
+        // DEBUG_LOG("APP", "Event Type: %d\n", g_task_event_type);
+        // Switch on green LED to show we are awake
+            digitalWrite(LED_BUILTIN, HIGH);
+            while (g_task_event_type != NO_EVENT)
+            {
+                // Handle LoRa data events
+                lora_data_handler();
+                    // Timer triggered event, check serial
+                if ((g_task_event_type & LORA_TX) == LORA_TX)
+                {
+                    g_task_event_type &= N_LORA_TX;
+                    DEBUG_LOG("APP", "LORA TX WAKEUP");
+                    if (lora_busy)
+                    {
+                        DEBUG_LOG("APP", "LoRaWAN TX cycle not finished, skip this event");
+                    }
+                    else
+                    {
+                        lmh_error_status result;
+                        // lora_packet[0] = get_lora_batt();
+                        // DEBUG_LOG("LORAWAN BATTERY", "Battery Level Value %d", lora_packet[0]);
+                        result = send_lora_packet((uint8_t *)&lora_packet, sizeof(lora_packet), 1);
+                        // result = send_lora_packet((uint8_t *)&gnss_location, sizeof(s_gnss_location), 1);
+
+                        switch (result)
+                        {
+                        case LMH_SUCCESS:
+                            DEBUG_LOG("APP", "Packet enqueued");
+                            /// \todo set a flag that TX cycle is running
+                            lora_busy = true;
+                            break;
+                        case LMH_BUSY:
+                            DEBUG_LOG("APP", "LoRa transceiver is busy");
+                            break;
+                        case LMH_ERROR:
+                            DEBUG_LOG("APP", "Packet error, too big to send with current DR");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        // vTaskDelay(5000);
+        g_task_event_type = 0;
+        // Go back to sleep
+        xSemaphoreTake(g_task_sem, 10);
+        // Switch off blue LED to show we go to sleep
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(10);
+    }
+}
+
 /**
  * @brief Read the battery level as value
  * between 0 and 254. This is used in LoRaWan status requests
@@ -89,7 +200,7 @@ uint32_t otaaDevAddr = 0;
  */
 uint8_t get_lora_batt(void)
 {
-    return 0;
+    return mvToLoRaWanBattVal(readVBAT());
 }
 
 /**
@@ -144,7 +255,6 @@ int8_t init_lorawan(void)
 
     DEBUG_LOG("LORA", "Begin join timer");
     // Initialize the app timer
-    // g_task_wakeup_timer.begin(g_lorawan_settings.send_repeat_time, periodic_wakeup);
     g_task_lora_tx_wakeup_timer.begin(g_lorawan_settings.send_repeat_time * 1000, lora_tx_wakeup);
 
     DEBUG_LOG("LORA", "Start Join");
@@ -153,6 +263,62 @@ int8_t init_lorawan(void)
 
     g_lorawan_initialized = true;
     return 0;
+}
+
+/**
+ * @brief Handle received LoRa Data
+ * 
+ */
+void lora_data_handler(void)
+{
+	// LoRa Join finished handling
+	if ((g_task_event_type & LORA_JOIN_FIN) == LORA_JOIN_FIN)
+	{
+		g_task_event_type &= N_LORA_JOIN_FIN;
+		if (g_join_result)
+		{
+			DEBUG_LOG("APP", "Successfully joined network");
+		}
+		else
+		{
+			DEBUG_LOG("APP", "Join network failed");
+			/// \todo here join could be restarted.
+			// lmh_join();
+		}
+	}
+
+	// LoRa data handling
+	if ((g_task_event_type & LORA_DATA) == LORA_DATA)
+	{
+		/**************************************************************/
+		/**************************************************************/
+		/// \todo LoRa data arrived
+		/// \todo parse them here
+		/**************************************************************/
+		/**************************************************************/
+		g_task_event_type &= N_LORA_DATA;
+		DEBUG_LOG("APP", "Received package over LoRa");
+		char log_buff[g_rx_data_len * 3] = {0};
+		uint8_t log_idx = 0;
+		for (int idx = 0; idx < g_rx_data_len; idx++)
+		{
+			sprintf(&log_buff[log_idx], "%02X ", g_rx_lora_data[idx]);
+			log_idx += 3;
+		}
+		lora_busy = false;
+		DEBUG_LOG("APP", "%s", log_buff);
+	}
+
+	// LoRa TX finished handling
+	if ((g_task_event_type & LORA_TX_FIN) == LORA_TX_FIN)
+	{
+		g_task_event_type &= N_LORA_TX_FIN;
+
+		DEBUG_LOG("APP", "LPWAN TX cycle %s", g_rx_fin_result ? "finished ACK" : "failed NAK");
+
+		/// \todo reset flag that TX cycle is running
+		lora_busy = false;
+	}
 }
 
 /**************************************************************/

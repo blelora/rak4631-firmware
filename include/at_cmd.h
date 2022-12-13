@@ -1,7 +1,7 @@
-#include "main.h"
+#ifndef AT_CMD_H
+#define AT_CMD_H
 
-#ifndef __AT_H__
-#define __AT_H__
+#include "main.h"
 
 #define AT_ERROR "+CME ERROR:"
 #define ATCMD_SIZE 160
@@ -14,5 +14,7 @@
 #define AT_ERRNO_EXEC_FAIL (7)
 #define AT_ERRNO_SYS (8)
 #define AT_CB_PRINT (0xFF)
+
+void at_cmd_init();
 
 #endif

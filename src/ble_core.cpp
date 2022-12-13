@@ -6,6 +6,8 @@ BLEDfu ble_dfu;
 BLEDis ble_dis;
 // BLE UART Service
 BLEUart ble_uart;
+// BLE BAS Service
+BLEBas ble_bas;
 
 BLEService        lorawan_control_service = BLEService("AAA00000-0000-0000-0000-123456789ABC");
 BLECharacteristic lorawan_control_char = BLECharacteristic("AAA10000-0000-0000-0000-123456789ABC");
@@ -61,6 +63,8 @@ void init_ble(void)
     // Start the UART service
 	ble_uart.begin();
     ble_uart.setRxCallback(bleuart_rx_callback);
+	// Start the BAS service
+	ble_bas.begin();
 
 	// Initialize the LoRa control service
 	BLEService lorawan_control_s = init_lorawan_control_characteristics();
