@@ -27,7 +27,8 @@ void system_bringup(void)
 	xSemaphoreTake(canStartMutex, portMAX_DELAY);
 
     Wire.begin();
-    
+
+    init_flash();
     battery_init();
     at_cmd_init();
     init_ble();

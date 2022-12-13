@@ -329,9 +329,9 @@ static int at_exec_sendfreq(char *str)
 	if ((g_lorawan_settings.send_repeat_time != 0))
 	{
 		// Now we are connected, start the timer that will wakeup the loop frequently
-		// g_task_lora_tx_wakeup_timer.stop();
-		// g_task_lora_tx_wakeup_timer.setPeriod(g_lorawan_settings.send_repeat_time);
-		// g_task_lora_tx_wakeup_timer.start();
+		g_task_lora_tx_wakeup_timer.stop();
+		g_task_lora_tx_wakeup_timer.setPeriod(g_lorawan_settings.send_repeat_time);
+		g_task_lora_tx_wakeup_timer.start();
 	}
 
 	return 0;

@@ -236,6 +236,7 @@
 // }
 #include "main.h"
 #include "system.h"
+#include "version.h"
 
 #define LED_GREEN PIN_LED1
 
@@ -264,9 +265,9 @@ void setup()
         }
     }
 #endif
-    // DEBUG_LOG("MAIN", "firmware_version: %s", device_firmware_version);
-    // DEBUG_LOG("MAIN", "model_code: %s", device_model_code);
-    // DEBUG_LOG("MAIN", "git_hash: %s", device_git_hash);
+    DEBUG_LOG("MAIN", "firmware_version: %s", device_firmware_version);
+    DEBUG_LOG("MAIN", "model_code: %s", device_model_code);
+    DEBUG_LOG("MAIN", "git_hash: %s", device_git_hash);
     system_init();
 
     delay(1000);

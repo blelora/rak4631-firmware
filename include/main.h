@@ -118,6 +118,9 @@ extern uint8_t g_tx_data_len;
 extern bool g_lorawan_initialized;
 extern int16_t g_last_rssi;
 extern int8_t g_last_snr;
+extern const char device_firmware_version[6];
+extern const char device_model_code[8];
+extern const char device_git_hash[41];
 
 void lora_data_handler(void);
 
@@ -130,5 +133,7 @@ void log_settings(void);
 void flash_reset(void);
 void flash_default_credentials(void);
 void flash_default_settings(void);
+
+
 
 #endif // MAIN_H

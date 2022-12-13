@@ -31,9 +31,9 @@ void battery_task(void *arg)
         uint8_t vbat_per = mvToPercent(readVBAT());
         ble_bas.write(mvToPercent(readVBAT()));
         ble_bas.notify(vbat_per);
-        DEBUG_LOG("MAIN", "Battery Percentage %d, USB Mounted Status: %d",vbat_per, TinyUSBDevice.mounted());
+        DEBUG_LOG("BATTERY", "Battery Percentage %d, USB Mounted Status: %d",vbat_per, TinyUSBDevice.mounted());
 
-        vTaskDelay(5000);
+        vTaskDelay(30000);
     }
 }
 
