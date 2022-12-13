@@ -32,6 +32,22 @@ void at_cmd_task(void *arg)
             // printf("%c", temp);
             at_serial_input(uint8_t(temp));
         }
+
+		if ((g_task_event_type & BLE_DATA) == BLE_DATA)
+		{
+			/** BLE UART data arrived */
+			g_task_event_type &= N_BLE_DATA;
+			uint8_t temp;
+			while (ble_uart.available() > 0)
+			{
+				temp = ble_uart.read();
+				at_serial_input(uint8_t(temp));
+				delay(5);
+			}
+			at_serial_input(uint8_t('\n'));
+			DEBUG_LOG("BLE UART", "Received Command");
+		}
+
         vTaskDelay(1);
     }
 }

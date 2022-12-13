@@ -29,8 +29,8 @@ void system_bringup(void)
     
     battery_init();
     at_cmd_init();
+    init_ble();
     // lorawan_init();
-    // init_ble();
 }
 
 void system_task(void *arg)
