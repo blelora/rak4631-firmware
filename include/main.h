@@ -8,6 +8,7 @@
 #include "ble_core.h"
 
 #include "at_cmd.h"
+#include <CayenneLPP.h>
 
 // Debug output, 0 to disable, 1 to enable
 #define DEBUG 1
@@ -79,7 +80,7 @@ struct s_lorawan_credentials
 struct s_lorawan_settings
 {
 	// Send repeat time in seconds 
-	uint32_t send_repeat_time = 10;
+	uint32_t send_repeat_time = 60;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
 	// Number of join retries

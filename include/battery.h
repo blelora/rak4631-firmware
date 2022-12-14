@@ -7,5 +7,6 @@
 void battery_init();
 uint8_t mvToLoRaWanBattVal(float mvolts);
 float readVBAT(void);
+uint8_t mvToPercent(float mvolts);
 
 #endif

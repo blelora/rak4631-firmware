@@ -4,6 +4,8 @@
 
 #define LORAWAN_STACK_SIZE (256 * 4)
 
+CayenneLPP lpp(51);
+
 void lorawan_task(void *arg);
 int8_t init_lorawan(void);
 lmh_error_status send_lora_packet(uint8_t *data, uint8_t size, uint8_t fport);
@@ -158,10 +160,13 @@ void lorawan_task(void *arg)
                     else
                     {
                         lmh_error_status result;
-                        // lora_packet[0] = get_lora_batt();
-                        // DEBUG_LOG("LORAWAN BATTERY", "Battery Level Value %d", lora_packet[0]);
-                        result = send_lora_packet((uint8_t *)&lora_packet, sizeof(lora_packet), 1);
-                        // result = send_lora_packet((uint8_t *)&gnss_location, sizeof(s_gnss_location), 1);
+
+                        // pack payload data
+                        lpp.reset();
+                        lpp.addLuminosity(1, mvToPercent(readVBAT()));
+                        lpp.addGPS(2, gnss_location.latitude/10000000.0, gnss_location.longitude/10000000.0, gnss_location.altitude/1000.0);
+
+                        result = send_lora_packet((uint8_t *)lpp.getBuffer(), lpp.getSize(), 1);
 
                         switch (result)
                         {
@@ -187,7 +192,7 @@ void lorawan_task(void *arg)
         xSemaphoreTake(g_task_sem, 10);
         // Switch off blue LED to show we go to sleep
         digitalWrite(LED_BUILTIN, LOW);
-        delay(10);
+        vTaskDelay(10);
     }
 }
 
@@ -372,15 +377,15 @@ static void lpwan_joined_handler(void)
 
     g_lpwan_has_joined = true;
 
-    // if (g_lorawan_settings.send_repeat_time != 0)
-    // {
-    //     DEBUG_LOG("LORA", "Start timer");
-    //     delay(100); // Just to enable the serial port to send the message
-    //     // Now we are connected, start the timer that will wakeup the loop frequently
-    //     // g_task_wakeup_timer.start();
-    //     DEBUG_LOG("LORA", "Started timer");
-    //     delay(100); // Just to enable the serial port to send the message
-    // }
+    if (g_lorawan_settings.send_repeat_time != 0)
+    {
+        DEBUG_LOG("LORA", "Start timer");
+        delay(100); // Just to enable the serial port to send the message
+        // Now we are connected, start the timer that will wakeup the loop frequently
+        g_task_lora_tx_wakeup_timer.start();
+        DEBUG_LOG("LORA", "Started timer");
+        delay(100); // Just to enable the serial port to send the message
+    }
 }
 
 /**

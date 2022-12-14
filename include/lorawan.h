@@ -3,6 +3,7 @@
 #define LORAWAN_H
 
 #include <LoRaWan-RAK4630.h>
+#include "gnss.h"
 
 int8_t init_lorawan(void);
 lmh_error_status send_lora_packet(uint8_t *data, uint8_t size, uint8_t fport = 0);
