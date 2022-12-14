@@ -86,7 +86,7 @@ void init_ble(void)
     Bluefruit.Advertising.restartOnDisconnect(true);
     Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
     Bluefruit.Advertising.setFastTimeout(30);   // number of seconds in fast mode
-    Bluefruit.Advertising.start(0);             // 0 = Don't stop advertising after n seconds
+    Bluefruit.Advertising.start(30);             // 0 = Don't stop advertising after n seconds
 }
 
 // Callback when client connects
