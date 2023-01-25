@@ -4,7 +4,7 @@
 
 #define LORAWAN_STACK_SIZE (256 * 4)
 
-CayenneLPP lpp(51);
+// CayenneLPP lpp(51);
 
 void lorawan_task(void *arg);
 int8_t init_lorawan(void);
@@ -162,13 +162,15 @@ void lorawan_task(void *arg)
                         lmh_error_status result;
 
                         // pack payload data
-                        lpp.reset();
-                        lpp.addLuminosity(1, mvToPercent(readVBAT()));
-                        lpp.addTemperature(2, temp_hum.temperature);
-                        lpp.addRelativeHumidity(3, temp_hum.humidity);
+                        // lpp.reset();
+                        // lpp.addLuminosity(1, mvToPercent(readVBAT()));
+                        // lpp.addTemperature(2, temp_hum.temperature);
+                        // lpp.addRelativeHumidity(3, temp_hum.humidity);
                         // lpp.addGPS(4, gnss_location.latitude/10000000.0, gnss_location.longitude/10000000.0, gnss_location.altitude/1000.0);
 
-                        result = send_lora_packet((uint8_t *)lpp.getBuffer(), lpp.getSize(), 1);
+                        // result = send_lora_packet((uint8_t *)lpp.getBuffer(), lpp.getSize(), 1);
+
+                        result = send_lora_packet((uint8_t *)&gnss_location, sizeof(s_gnss_location), 1);
 
                         switch (result)
                         {

@@ -80,15 +80,15 @@ struct s_lorawan_credentials
 struct s_lorawan_settings
 {
 	// Send repeat time in seconds 
-	uint32_t send_repeat_time = 600;
+	uint32_t send_repeat_time = 10;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
 	// Number of join retries
 	uint8_t join_trials = 5;
 	// TX power 0 .. 15 (validity depends on Region)
-	uint8_t tx_power = 0;
+	uint8_t tx_power = 15;
 	// Data rate 0 .. 15 (validity depends on Region)
-	uint8_t data_rate = 3;
+	uint8_t data_rate = 0;
 	// Subband channel selection 1 .. 9
 	uint8_t subband_channels = 2;
 	// Data port to send data

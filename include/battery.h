@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "ble_core.h"
+#include "gnss.h"
 
 void battery_init();
 uint8_t mvToLoRaWanBattVal(float mvolts);

@@ -33,8 +33,8 @@ void system_bringup(void)
     init_flash();
     battery_init();
     at_cmd_init();
-    // gnss_init();
-    temp_hum_init();
+    gnss_init();
+    // temp_hum_init();
     init_ble();
     lorawan_init();
 }

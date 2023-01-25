@@ -29,6 +29,7 @@ void battery_task(void *arg)
     while (1)
     {
         uint8_t vbat_per = mvToPercent(readVBAT());
+        gnss_location.battery = vbat_per;
         ble_bas.write(mvToPercent(readVBAT()));
         ble_bas.notify(vbat_per);
         DEBUG_LOG("BATTERY", "Battery Percentage %d, USB Mounted Status: %d",vbat_per, TinyUSBDevice.mounted());
