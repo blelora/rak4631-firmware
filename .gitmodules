@@ -1,0 +1,3 @@
+[submodule "lib/Serial_CAN_Arduino"]
+	path = lib/Serial_CAN_Arduino
+	url = git@github.com:Longan-Labs/Serial_CAN_Arduino.git
