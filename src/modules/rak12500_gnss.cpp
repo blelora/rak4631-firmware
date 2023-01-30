@@ -7,8 +7,6 @@ long g_lastTime = 0; // Simple local timer. Limits amount of I2C traffic to u-bl
 
 bool rak12500_init(void)
 {
-    int baud[7] = {9600, 14400, 19200, 38400, 56000, 57600, 115200};
-
     DEBUG_LOG("RAK12500-GNSS", "INIT");
     pinMode(WB_IO2, OUTPUT);
     digitalWrite(WB_IO2, 0);
@@ -16,19 +14,9 @@ bool rak12500_init(void)
     digitalWrite(WB_IO2, 1);
     delay(1000);
 
-    for (int i = 0; i < sizeof(baud) / sizeof(int); i++)
+    if (g_myGNSS.begin())
     {
-        Serial1.begin(baud[i]);
-        while (!Serial1)
-            ; // Wait for user to open terminal
-        if (g_myGNSS.begin(Serial1) == true)
-        {
-            is_rak12500_init = true;
-            // Serial.printf("GNSS baund rate: %d \n", baud[i]); // GNSS baund rate
-            break;
-        }
-        Serial1.end();
-        delay(200);
+        is_rak12500_init = true;
     }
 
     if (!is_rak12500_init)
@@ -37,9 +25,8 @@ bool rak12500_init(void)
     }
     else
     {
-        g_myGNSS.setUART1Output(COM_TYPE_UBX); // Set the UART port to output UBX only
         g_myGNSS.setI2COutput(COM_TYPE_UBX);   // Set the I2C port to output UBX only (turn off NMEA noise)
-        g_myGNSS.saveConfiguration();          // Save the current settings to flash and BBR
+        g_myGNSS.saveConfiguration(VAL_CFG_SUBSEC_IOPORT);          // Save the current settings to flash and BBR
         DEBUG_LOG("RAK12500-GNSS", "INIT SUCCESS");
 
         // This isn't working as expected yet
