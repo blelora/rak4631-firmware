@@ -14,6 +14,11 @@ void lora_data_handler(void);
 // Semaphore used by events to wake up loop task
 SemaphoreHandle_t g_task_sem = NULL;
 
+QueueHandle_t xStructQueue = NULL;
+
+/** payload buffer to be sent **/
+lorawan_payload_s lorawan_payload;
+
 /** Flag showing if TX cycle is ongoing */
 bool lora_busy = false;
 
@@ -106,6 +111,7 @@ static lmh_callback_t lora_callbacks = {get_lora_batt, BoardGetUniqueId, BoardGe
 bool g_lpwan_has_joined = false;
 
 uint32_t otaaDevAddr = 0;
+uint8_t currentQueueSize = 0;
 
 // Period Wakeup for LoRaWAN TX
 void lora_tx_wakeup(TimerHandle_t unused)
@@ -124,6 +130,13 @@ void lorawan_init()
     g_task_sem = xSemaphoreCreateBinary();
     // Initialize semaphore
     xSemaphoreGive(g_task_sem);
+
+    xStructQueue = xQueueCreate(10, sizeof(lorawan_payload));
+    if(xStructQueue == NULL)
+    {
+        DEBUG_LOG("LORAWAN", "Queue creation failed");
+        return;
+    }
 
     xTaskCreate(lorawan_task, "LORAWAN", LORAWAN_STACK_SIZE, NULL, TASK_PRIO_LOW, NULL);
 }
@@ -161,30 +174,32 @@ void lorawan_task(void *arg)
                     {
                         lmh_error_status result;
 
-                        // pack payload data
-                        // lpp.reset();
-                        // lpp.addLuminosity(1, mvToPercent(readVBAT()));
-                        // lpp.addTemperature(2, temp_hum.temperature);
-                        // lpp.addRelativeHumidity(3, temp_hum.humidity);
-                        // lpp.addGPS(4, gnss_location.latitude/10000000.0, gnss_location.longitude/10000000.0, gnss_location.altitude/1000.0);
-
-                        // result = send_lora_packet((uint8_t *)lpp.getBuffer(), lpp.getSize(), 1);
-
-                        result = send_lora_packet((uint8_t *)&gnss_location, sizeof(s_gnss_location), 1);
-
-                        switch (result)
+                        if(xStructQueue != NULL)
                         {
-                        case LMH_SUCCESS:
-                            DEBUG_LOG("APP", "Packet enqueued");
-                            /// \todo set a flag that TX cycle is running
-                            lora_busy = true;
-                            break;
-                        case LMH_BUSY:
-                            DEBUG_LOG("APP", "LoRa transceiver is busy");
-                            break;
-                        case LMH_ERROR:
-                            DEBUG_LOG("APP", "Packet error, too big to send with current DR");
-                            break;
+                            if(xQueueReceive( xStructQueue,&(lorawan_payload), (TickType_t) 0) == pdPASS)
+                            {
+                                currentQueueSize = uxQueueMessagesWaiting(xStructQueue);
+                                DEBUG_LOG("LORAWAN", "Received from queue, message size: %d, current queue size: %d", lorawan_payload.data_length, currentQueueSize);
+                                result = send_lora_packet(lorawan_payload.data, lorawan_payload.data_length, 1);
+
+                                switch (result)
+                                {
+                                case LMH_SUCCESS:
+                                    DEBUG_LOG("LORAWAN", "Packet enqueued");
+                                    lora_busy = true;
+                                    break;
+                                case LMH_BUSY:
+                                    DEBUG_LOG("LORAWAN", "LoRa transceiver is busy");
+                                    break;
+                                case LMH_ERROR:
+                                    DEBUG_LOG("LORAWAN", "Packet error, too big to send with current DR");
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                DEBUG_LOG("LORAWAN", "Queue empty");
+                            }
                         }
                     }
                 }
