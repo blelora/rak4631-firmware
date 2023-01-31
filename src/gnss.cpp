@@ -29,7 +29,7 @@ void gnss_task(void *arg)
 
         gnss_location.accuracy = g_myGNSS.getSIV(200);
         DEBUG_LOG("GNSS","SIV: %d", gnss_location.accuracy);
-        if(gnss_location.accuracy >= 6)
+        if(gnss_location.accuracy >= 6 && gnss_location.accuracy < 30)
         {
             gnss_location.latitude = g_myGNSS.getLatitude(200);
             DEBUG_LOG("GNSS", "Lat: %d", gnss_location.latitude);
@@ -44,6 +44,7 @@ void gnss_task(void *arg)
             // DEBUG_LOG("GNSS","Heading: %d (degrees * 10^-5)", gnss_location.heading);
 
             gnss_payload.data_length = sizeof(gnss_location);
+            gnss_payload.fport = 1;
             memcpy(gnss_payload.data, &gnss_location, sizeof(gnss_location));
 
             xQueueSend(xStructQueue,( void * ) &gnss_payload,( TickType_t ) 0 );

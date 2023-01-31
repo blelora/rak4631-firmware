@@ -38,6 +38,7 @@ void battery_task(void *arg)
         DEBUG_LOG("BATTERY", "Battery Percentage %d, USB Mounted Status: %d",vbat_per, TinyUSBDevice.mounted());
 
         battery_payload.data_length = sizeof(battery_status);
+        battery_payload.fport = 2;
         memcpy(battery_payload.data, &battery_status, sizeof(battery_status));
 
         xQueueSend(xStructQueue,( void * ) &battery_payload,( TickType_t ) 0 );

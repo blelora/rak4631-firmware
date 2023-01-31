@@ -17,6 +17,7 @@ struct lorawan_payload_s
 {
    	uint8_t data[51];
 	uint8_t data_length;
+	uint8_t fport;
 };
 
 extern lorawan_payload_s lorawan_payload;

@@ -180,7 +180,7 @@ void lorawan_task(void *arg)
                             {
                                 currentQueueSize = uxQueueMessagesWaiting(xStructQueue);
                                 DEBUG_LOG("LORAWAN", "Received from queue, message size: %d, current queue size: %d", lorawan_payload.data_length, currentQueueSize);
-                                result = send_lora_packet(lorawan_payload.data, lorawan_payload.data_length, 1);
+                                result = send_lora_packet(lorawan_payload.data, lorawan_payload.data_length, lorawan_payload.fport);
 
                                 switch (result)
                                 {
