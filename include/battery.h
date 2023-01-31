@@ -3,7 +3,12 @@
 
 #include "main.h"
 #include "ble_core.h"
-#include "gnss.h"
+#include "lorawan.h"
+
+struct s_battery_status {
+    uint8_t  capacity = 0;
+    uint8_t charging = 0;
+} __attribute__((packed));
 
 void battery_init();
 uint8_t mvToLoRaWanBattVal(float mvolts);

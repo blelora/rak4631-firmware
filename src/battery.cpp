@@ -4,6 +4,8 @@
 #define PIN_VBAT WB_A0
 
 uint32_t vbat_pin = PIN_VBAT;
+s_battery_status battery_status;
+lorawan_payload_s battery_payload;
 
 #define VBAT_MV_PER_LSB (0.73242188F) // 3.0V ADC range and 12 - bit ADC resolution = 3000mV / 4096
 #define VBAT_DIVIDER_COMP (1.73)      // Compensation factor for the VBAT divider, depend on the board
@@ -29,10 +31,16 @@ void battery_task(void *arg)
     while (1)
     {
         uint8_t vbat_per = mvToPercent(readVBAT());
-        gnss_location.battery = vbat_per;
+        battery_status.capacity = vbat_per;
+        battery_status.charging = TinyUSBDevice.mounted();
         ble_bas.write(mvToPercent(readVBAT()));
         ble_bas.notify(vbat_per);
         DEBUG_LOG("BATTERY", "Battery Percentage %d, USB Mounted Status: %d",vbat_per, TinyUSBDevice.mounted());
+
+        battery_payload.data_length = sizeof(battery_status);
+        memcpy(battery_payload.data, &battery_status, sizeof(battery_status));
+
+        xQueueSend(xStructQueue,( void * ) &battery_payload,( TickType_t ) 0 );
 
         vTaskDelay(30000);
     }
