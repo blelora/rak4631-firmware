@@ -3,7 +3,9 @@
 #include "at_cmd.h"
 #include "lorawan.h"
 #include "gnss.h"
-#include "temp_hum.h"
+#include "obd.h"
+// #include "temp_hum.h"
+
 
 #include <Wire.h>
 
@@ -34,6 +36,7 @@ void system_bringup(void)
     battery_init();
     at_cmd_init();
     gnss_init();
+    obd_init();
     // temp_hum_init();
     init_ble();
     lorawan_init();
