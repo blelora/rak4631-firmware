@@ -80,7 +80,7 @@ struct s_lorawan_credentials
 struct s_lorawan_settings
 {
 	// Send repeat time in seconds 
-	uint32_t send_repeat_time = 10;
+	uint32_t send_repeat_time = 1;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
 	// Number of join retries

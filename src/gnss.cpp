@@ -50,6 +50,6 @@ void gnss_task(void *arg)
             xQueueSend(xStructQueue,( void * ) &gnss_payload,( TickType_t ) 0 );
         }
         
-        vTaskDelay(20000);
+        vTaskDelay(10000);
     }
 }

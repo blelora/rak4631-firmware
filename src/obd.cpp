@@ -63,12 +63,15 @@ void obd_task(void *arg)
             Serial.println("\nCould not get VIN");
         }
 
-        obd_payload.data_length = sizeof(obd_data);
-        obd_payload.fport = 3;
-        memcpy(obd_payload.data, &obd_data, sizeof(obd_data));
+        if (ret)
+        {
+            obd_payload.data_length = sizeof(obd_data);
+            obd_payload.fport = 3;
+            memcpy(obd_payload.data, &obd_data, sizeof(obd_data));
 
-        xQueueSend(xStructQueue,( void * ) &obd_payload,( TickType_t ) 0 );
+            xQueueSend(xStructQueue,( void * ) &obd_payload,( TickType_t ) 0 );
+        }
 
-        vTaskDelay(5000);
+        vTaskDelay(10000);
     }
 }

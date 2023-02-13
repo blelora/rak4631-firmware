@@ -138,7 +138,7 @@ void lorawan_init()
         return;
     }
 
-    xTaskCreate(lorawan_task, "LORAWAN", LORAWAN_STACK_SIZE, NULL, TASK_PRIO_LOW, NULL);
+    xTaskCreate(lorawan_task, "LORAWAN", LORAWAN_STACK_SIZE, NULL, TASK_PRIO_NORMAL, NULL);
 }
 
 void lorawan_task(void *arg)

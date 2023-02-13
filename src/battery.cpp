@@ -43,7 +43,7 @@ void battery_task(void *arg)
 
         xQueueSend(xStructQueue,( void * ) &battery_payload,( TickType_t ) 0 );
 
-        vTaskDelay(30000);
+        vTaskDelay(150000);
     }
 }
 
