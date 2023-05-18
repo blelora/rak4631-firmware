@@ -39,6 +39,8 @@ void setup()
     digitalWrite(LED_GREEN, HIGH);
 
     DEBUG_LOG("MAIN", "Setup Complete");
+
+    suspendLoop();
 }
 
 void loop()

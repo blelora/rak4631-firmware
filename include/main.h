@@ -70,25 +70,25 @@ extern SoftwareTimer g_task_lora_tx_wakeup_timer;
 struct s_lorawan_credentials
 {
 	// OTAA Device EUI MSB
-	uint8_t node_device_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_device_eui[8] = {0x60, 0x81, 0xF9, 0x6D, 0x9D, 0xB2, 0x5F, 0x60};
 	// OTAA Application EUI MSB
-	uint8_t node_app_eui[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_app_eui[8] = {0x60, 0x81, 0xF9, 0x17, 0x4F, 0xB1, 0x08, 0xF8};
 	// OTAA Application Key MSB
-	uint8_t node_app_key[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	uint8_t node_app_key[16] = {0xDA, 0x7C, 0xAD, 0x84, 0xCB, 0xEE, 0x86, 0x28, 0x24, 0x20, 0xB5, 0x2B, 0x33, 0xC1, 0xC0, 0xA5};
 };
 
 struct s_lorawan_settings
 {
 	// Send repeat time in seconds 
-	uint32_t send_repeat_time = 600;
+	uint32_t send_repeat_time = 60;
 	// Flag for ADR on or off
 	bool adr_enabled = false;
 	// Number of join retries
 	uint8_t join_trials = 5;
 	// TX power 0 .. 15 (validity depends on Region)
-	uint8_t tx_power = 0;
+	uint8_t tx_power = 15;
 	// Data rate 0 .. 15 (validity depends on Region)
-	uint8_t data_rate = 3;
+	uint8_t data_rate = 1;
 	// Subband channel selection 1 .. 9
 	uint8_t subband_channels = 2;
 	// Data port to send data

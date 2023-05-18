@@ -164,8 +164,9 @@ void lorawan_task(void *arg)
                         // pack payload data
                         lpp.reset();
                         lpp.addLuminosity(1, mvToPercent(readVBAT()));
-                        lpp.addTemperature(2, temp_hum.temperature);
-                        lpp.addRelativeHumidity(3, temp_hum.humidity);
+                        lpp.addLuminosity(2, light_lux);
+                        lpp.addTemperature(3, temp_hum.temperature);
+                        lpp.addRelativeHumidity(4, temp_hum.humidity);
                         // lpp.addGPS(4, gnss_location.latitude/10000000.0, gnss_location.longitude/10000000.0, gnss_location.altitude/1000.0);
 
                         result = send_lora_packet((uint8_t *)lpp.getBuffer(), lpp.getSize(), 1);
@@ -188,13 +189,11 @@ void lorawan_task(void *arg)
                 }
             }
         }
-        // vTaskDelay(5000);
         g_task_event_type = 0;
         // Go back to sleep
         xSemaphoreTake(g_task_sem, 10);
         // Switch off blue LED to show we go to sleep
         digitalWrite(LED_BUILTIN, LOW);
-        vTaskDelay(10);
     }
 }
 

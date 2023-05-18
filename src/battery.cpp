@@ -71,7 +71,7 @@ float readVBAT(void)
 uint8_t mvToPercent(float mvolts)
 {
     if (TinyUSBDevice.mounted())
-        return 111;
+        return 100;
 
 	if (mvolts < 3300)
 		return 0;

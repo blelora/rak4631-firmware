@@ -4,8 +4,7 @@
 #include "lorawan.h"
 #include "gnss.h"
 #include "temp_hum.h"
-
-#include <Wire.h>
+#include "light.h"
 
 #define SYSTEM_STACK_SIZE (256 * 4)
 
@@ -32,11 +31,12 @@ void system_bringup(void)
 
     init_flash();
     battery_init();
-    at_cmd_init();
+    // at_cmd_init();
     // gnss_init();
-    temp_hum_init();
+    // temp_hum_init();
+    // light_init();
     init_ble();
-    lorawan_init();
+    // lorawan_init();
 }
 
 void system_task(void *arg)
@@ -45,7 +45,7 @@ void system_task(void *arg)
     system_bringup();
     while (1)
     {
-        // DEBUG_LOG("SYSTEM", "TASK LOOP");
-        vTaskDelay(1000);
+        DEBUG_LOG("SYSTEM", "TASK LOOP");
+        vTaskDelay(20000);
     }
 }

@@ -36,6 +36,6 @@ void temp_hum_task(void *arg)
             DEBUG_LOG("TEMP_HUM", "Humidity: %f %", temp_hum.humidity);
         }
 
-        vTaskDelay(300000);
+        vTaskDelay(30000);
     }
 }
