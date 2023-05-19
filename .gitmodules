@@ -1,0 +1,3 @@
+[submodule "lib/Adafruit_LIS3DH"]
+	path = lib/Adafruit_LIS3DH
+	url = git@github.com:kent-williams/Adafruit_LIS3DH.git

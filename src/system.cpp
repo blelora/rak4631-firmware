@@ -5,6 +5,7 @@
 #include "gnss.h"
 #include "temp_hum.h"
 #include "light.h"
+#include "accel.h"
 
 #define SYSTEM_STACK_SIZE (256 * 4)
 
@@ -31,10 +32,11 @@ void system_bringup(void)
 
     init_flash();
     battery_init();
-    // at_cmd_init();
+    at_cmd_init();
     // gnss_init();
     // temp_hum_init();
     // light_init();
+    accel_init();
     init_ble();
     // lorawan_init();
 }
